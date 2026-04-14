@@ -1,8 +1,11 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1117">
 <title>VN Dropship Dashboard</title>
 <style>
   :root {
@@ -10,325 +13,530 @@
     --accent: #6c5ce7; --accent2: #a29bfe;
     --green: #00b894; --red: #e17055; --orange: #fdcb6e;
     --text: #dfe6e9; --text2: #b2bec3; --border: #2d3142;
+    --bottom-bar: 56px;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  .nav { display: flex; align-items: center; gap: 20px; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
-  .nav .logo { font-size: 20px; font-weight: 700; color: var(--accent2); }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh;
+    padding-bottom: calc(var(--bottom-bar) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* ===== NAV DESKTOP ===== */
+  .nav {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 24px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100; flex-wrap: wrap;
+  }
+  .nav .logo { font-size: 20px; font-weight: 700; color: var(--accent2); white-space: nowrap; }
   .nav .logo span { color: var(--green); }
   .nav-tabs { display: flex; gap: 2px; flex-wrap: wrap; }
-  .nav-tab { padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all .2s; border: none; background: none; }
+  .nav-tab {
+    padding: 8px 13px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; color: var(--text2); transition: all .2s;
+    border: none; background: none; white-space: nowrap;
+    -webkit-appearance: none;
+  }
   .nav-tab:hover { background: var(--surface2); color: var(--text); }
   .nav-tab.active { background: var(--accent); color: white; }
+  .nav-tab.launch-tab { background: linear-gradient(135deg,#ff6b35,#f7931e); color:#fff; font-weight:700; }
+
+  /* ===== BOTTOM NAV (mobile) ===== */
+  .bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: calc(var(--bottom-bar) + env(safe-area-inset-bottom, 0px));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .bottom-nav-inner { display: flex; height: var(--bottom-bar); }
+  .bottom-tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px; font-size: 10px; color: var(--text2);
+    background: none; border: none; cursor: pointer; padding: 4px 2px;
+    transition: color .2s;
+  }
+  .bottom-tab .icon { font-size: 20px; line-height: 1; }
+  .bottom-tab.active { color: var(--accent2); }
+  .bottom-tab.active .icon { filter: drop-shadow(0 0 6px var(--accent)); }
+
+  /* ===== LAYOUT ===== */
   .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
   .page { display: none; }
   .page.active { display: block; }
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+
+  /* ===== CARDS ===== */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
   .stat-card .label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
   .stat-card .value { font-size: 26px; font-weight: 700; }
   .stat-card .value.green { color: var(--green); }
   .stat-card .value.orange { color: var(--orange); }
   .stat-card .value.accent { color: var(--accent2); }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
   .card-title { font-size: 17px; font-weight: 600; }
   .card-subtitle { font-size: 13px; color: var(--text2); margin-top: -8px; margin-bottom: 16px; }
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; padding: 12px 14px; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
-  td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+  /* ===== TABLES ===== */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; min-width: 400px; }
+  th { text-align: left; padding: 10px 12px; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
   tr:hover td { background: var(--surface2); }
-  .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+
+  /* ===== BADGES & BUTTONS ===== */
+  .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; white-space: nowrap; }
   .badge.green { background: rgba(0,184,148,.15); color: var(--green); }
   .badge.red { background: rgba(225,112,85,.15); color: var(--red); }
   .badge.orange { background: rgba(253,203,110,.15); color: var(--orange); }
   .badge.accent { background: rgba(108,92,231,.15); color: var(--accent2); }
-  .btn { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .2s; }
+  .badge.blue { background: rgba(100,160,255,.15); color: #64a0ff; }
+  .btn {
+    padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all .2s;
+    -webkit-appearance: none; white-space: nowrap; display: inline-block;
+    text-decoration: none;
+  }
   .btn-primary { background: var(--accent); color: white; }
   .btn-primary:hover { background: var(--accent2); }
   .btn-success { background: var(--green); color: white; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-success:hover { filter: brightness(1.1); }
+  .btn-sm { padding: 7px 12px; font-size: 12px; }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
   .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .btn-danger { background: rgba(225,112,85,.15); color: var(--red); border: 1px solid var(--red); }
+
+  /* ===== FORMS ===== */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 14px; }
   .form-group { display: flex; flex-direction: column; gap: 6px; }
   .form-group.full { grid-column: 1 / -1; }
   .form-group label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; }
-  input, select, textarea { padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 14px; outline: none; font-family: inherit; }
+  input, select, textarea {
+    padding: 11px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-size: 14px;
+    outline: none; font-family: inherit; -webkit-appearance: none;
+    min-height: 44px; /* iOS touch target */
+  }
   input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 100px; }
-  .calc-result { background: var(--surface2); border-radius: 12px; padding: 20px; margin-top: 16px; }
-  .calc-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  textarea { resize: vertical; min-height: 90px; }
+
+  /* ===== MISC ===== */
+  .calc-result { background: var(--surface2); border-radius: 12px; padding: 18px; margin-top: 14px; }
+  .calc-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
   .calc-row:last-child { border: none; font-weight: 700; font-size: 17px; }
-  .calc-row.highlight { font-size: 18px; font-weight: 700; color: var(--green); background: rgba(0,184,148,.05); padding: 12px; border-radius: 8px; margin-top: 8px; }
-  .marketplace-links { display: flex; gap: 8px; flex-wrap: wrap; }
-  .mp-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; transition: all .2s; }
-  .mp-link.shopee { background: rgba(238,77,45,.15); color: #ee4d2d; }
-  .mp-link.lazada { background: rgba(15,54,159,.15); color: #6c8dff; }
-  .mp-link.tiki { background: rgba(26,148,217,.15); color: #1a94d9; }
-  .empty-state { text-align: center; padding: 50px 20px; color: var(--text2); }
+  .calc-row.highlight { font-size: 16px; font-weight: 700; color: var(--green); background: rgba(0,184,148,.05); padding: 12px; border-radius: 8px; margin-top: 8px; }
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text2); }
   .empty-state h3 { margin-bottom: 8px; color: var(--text); }
-  .delete-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; opacity: .6; }
-  .delete-btn:hover { opacity: 1; }
-  .search-box { display: flex; gap: 8px; margin-bottom: 16px; }
+  .search-box { display: flex; gap: 8px; margin-bottom: 14px; }
   .search-box input { flex: 1; }
   .score-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-top: 6px; }
   .score-fill { height: 100%; transition: width .3s; }
-  .output-box { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 8px; padding: 16px; margin-top: 12px; white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.6; position: relative; }
-  .copy-btn { position: absolute; top: 12px; right: 12px; padding: 4px 10px; font-size: 11px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; }
-  .copy-btn:hover { background: var(--accent2); }
-  .info-note { background: rgba(108,92,231,.08); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 6px; font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.5; }
+  .output-box { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 8px; padding: 14px; margin-top: 10px; white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.6; position: relative; padding-right: 70px; }
+  .copy-btn { position: absolute; top: 10px; right: 10px; padding: 4px 10px; font-size: 11px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .info-note { background: rgba(108,92,231,.08); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 6px; font-size: 13px; color: var(--text2); margin-bottom: 14px; line-height: 1.5; }
   .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .tag { padding: 4px 10px; border-radius: 20px; background: var(--surface2); font-size: 12px; color: var(--text2); }
-  @media (max-width: 768px) { .nav { padding: 12px 16px; } .container { padding: 16px; } .form-grid { grid-template-columns: 1fr; } }
+  .delete-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; opacity: .6; padding: 6px; }
+  .delete-btn:hover { opacity: 1; }
+
+  /* ===== TOAST ===== */
+  #toast-container { position: fixed; bottom: calc(var(--bottom-bar) + env(safe-area-inset-bottom, 0px) + 12px); left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+  .toast { background: #1e2235; color: var(--text); padding: 12px 20px; border-radius: 10px; font-size: 14px; box-shadow: 0 4px 24px rgba(0,0,0,.5); animation: toastIn .3s ease; border-left: 4px solid var(--accent); max-width: 320px; text-align: center; }
+  .toast.success { border-color: var(--green); }
+  .toast.error { border-color: var(--red); }
+  .toast.warning { border-color: var(--orange); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== MODAL ===== */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 500; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+  /* ===== COMMANDES STATUS ===== */
+  .status-select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 12px; cursor: pointer; -webkit-appearance: none; min-height: 0; }
+  .order-card { background: var(--surface2); border-radius: 10px; padding: 14px; margin-bottom: 10px; border-left: 4px solid var(--border); }
+  .order-card.status-pending { border-color: var(--orange); }
+  .order-card.status-ordered { border-color: var(--accent2); }
+  .order-card.status-shipped { border-color: #64a0ff; }
+  .order-card.status-delivered { border-color: var(--green); }
+  .order-card.status-issue { border-color: var(--red); }
+  .order-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .order-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--text2); margin-top: 8px; }
+  .order-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .nav { padding: 10px 14px; gap: 10px; }
+    .nav-tabs { gap: 2px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: calc(100vw - 110px); }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .container { padding: 14px 12px; }
+    .form-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .card { padding: 14px; }
+    .calc-row { font-size: 13px; }
+  }
+
+  @media (max-width: 480px) {
+    .bottom-nav { display: block; }
+    .nav-tabs { display: none; }
+    .container { padding: 12px 10px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .card { padding: 12px; border-radius: 10px; margin-bottom: 12px; }
+    .card-title { font-size: 15px; }
+    .btn { padding: 10px 14px; font-size: 13px; }
+    th, td { padding: 8px 8px; font-size: 12px; }
+    .output-box { font-size: 12px; padding: 12px; padding-right: 60px; }
+    .stat-card .value { font-size: 22px; }
+    h3 { font-size: 16px; }
+  }
+
+  @media (max-width: 360px) {
+    .stats-row { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- ORDER MODAL -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal">
+    <h3>🛒 Nouvelle Commande</h3>
+    <input type="hidden" id="om-product-name">
+    <input type="hidden" id="om-product-url">
+    <div class="form-grid" style="grid-template-columns:1fr 1fr">
+      <div class="form-group full"><label>Produit</label><input type="text" id="om-product" placeholder="Nom du produit"></div>
+      <div class="form-group"><label>Client</label><input type="text" id="om-client" placeholder="Nom du client"></div>
+      <div class="form-group"><label>Téléphone</label><input type="tel" id="om-phone" placeholder="+84..."></div>
+      <div class="form-group full"><label>Adresse livraison</label><textarea id="om-address" rows="2" placeholder="Adresse complète, ville, province"></textarea></div>
+      <div class="form-group"><label>Coût source (₫)</label><input type="number" id="om-cost" placeholder="85000"></div>
+      <div class="form-group"><label>Prix vente (₫)</label><input type="number" id="om-sell" placeholder="250000"></div>
+      <div class="form-group"><label>Quantité</label><input type="number" id="om-qty" value="1" min="1"></div>
+      <div class="form-group"><label>Source achat</label>
+        <select id="om-source"><option>1688</option><option>AliExpress</option><option>Taobao</option></select>
+      </div>
+      <div class="form-group full"><label>Lien produit fournisseur</label><input type="url" id="om-url" placeholder="https://detail.1688.com/..."></div>
+      <div class="form-group full"><label>Notes</label><input type="text" id="om-notes" placeholder="Variante, couleur, instructions spéciales..."></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-success" onclick="saveOrder()">✅ Enregistrer</button>
+      <a id="om-1688-link" href="#" target="_blank" class="btn" style="background:#ff6b00">🇨🇳 Ouvrir 1688</a>
+      <button class="btn btn-outline" onclick="closeOrderModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
 <nav class="nav">
   <div class="logo">VN<span>Dropship</span></div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" data-page="dashboard">Dashboard</button>
-    <button class="nav-tab" data-page="launch" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;font-weight:700">🚀 Launch Top 10</button>
-    <button class="nav-tab" data-page="niche">Niches</button>
-    <button class="nav-tab" data-page="listing">Fiche produit</button>
-    <button class="nav-tab" data-page="monitor">Monitoring</button>
-    <button class="nav-tab" data-page="calc1688">Calc 1688</button>
-    <button class="nav-tab" data-page="replies">Réponses client</button>
-    <button class="nav-tab" data-page="tracker">Tracker</button>
+  <div class="nav-tabs" id="nav-tabs">
+    <button class="nav-tab active" data-page="dashboard">📊 Dashboard</button>
+    <button class="nav-tab launch-tab" data-page="launch">🚀 Top 10</button>
+    <button class="nav-tab" data-page="commandes">🛒 Commandes</button>
+    <button class="nav-tab" data-page="niche">🔍 Niches</button>
+    <button class="nav-tab" data-page="listing">📝 Listing</button>
+    <button class="nav-tab" data-page="monitor">👁 Monitor</button>
+    <button class="nav-tab" data-page="calc1688">🧮 Calc</button>
+    <button class="nav-tab" data-page="replies">💬 Réponses</button>
+    <button class="nav-tab" data-page="tracker">📦 Tracker</button>
   </div>
 </nav>
 
+<!-- BOTTOM NAV (mobile) -->
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bottom-tab active" data-page="dashboard"><span class="icon">📊</span>Dashboard</button>
+    <button class="bottom-tab" data-page="launch"><span class="icon">🚀</span>Top 10</button>
+    <button class="bottom-tab" data-page="commandes"><span class="icon">🛒</span>Commandes</button>
+    <button class="bottom-tab" data-page="calc1688"><span class="icon">🧮</span>Calc</button>
+    <button class="bottom-tab" data-page="replies"><span class="icon">💬</span>Réponses</button>
+  </div>
+</div>
+
 <div class="container">
 
-  <!-- DASHBOARD -->
-  <div id="page-dashboard" class="page active">
-    <div class="stats-row">
-      <div class="stat-card"><div class="label">Niches analysées</div><div class="value accent" id="stat-niches">0</div></div>
-      <div class="stat-card"><div class="label">Produits en tracker</div><div class="value green" id="stat-tracked">0</div></div>
-      <div class="stat-card"><div class="label">Prix surveillés</div><div class="value orange" id="stat-monitors">0</div></div>
-      <div class="stat-card"><div class="label">Fiches générées</div><div class="value accent" id="stat-listings">0</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title" style="margin-bottom:8px">Workflow dropshipping sans entrepôt</div>
-      <div class="card-subtitle">Ton flux de travail type pour chaque produit</div>
-      <table>
-        <thead><tr><th>Étape</th><th>Action</th><th>Outil</th></tr></thead>
-        <tbody>
-          <tr><td>1. Recherche</td><td>Trouver une niche rentable</td><td><span class="badge accent">Niches</span></td></tr>
-          <tr><td>2. Sourcing</td><td>Trouver le produit sur 1688/AliExpress</td><td><span class="badge accent">Calc 1688</span></td></tr>
-          <tr><td>3. Marge</td><td>Calculer ton coût de revient réel</td><td><span class="badge accent">Calc 1688</span></td></tr>
-          <tr><td>4. Listing</td><td>Créer fiche Shopee optimisée en vietnamien</td><td><span class="badge accent">Fiche produit</span></td></tr>
-          <tr><td>5. Surveillance</td><td>Surveiller prix concurrents</td><td><span class="badge accent">Monitoring</span></td></tr>
-          <tr><td>6. Vente</td><td>Commande → transfère au fournisseur</td><td><span class="badge accent">-</span></td></tr>
-          <tr><td>7. SAV</td><td>Répondre vite aux clients</td><td><span class="badge accent">Réponses</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Top niches à surveiller</div></div>
-      <div id="dashboard-niches"></div>
-    </div>
+<!-- ===== DASHBOARD ===== -->
+<div id="page-dashboard" class="page active">
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">Niches</div><div class="value accent" id="stat-niches">0</div></div>
+    <div class="stat-card"><div class="label">Tracker</div><div class="value green" id="stat-tracked">0</div></div>
+    <div class="stat-card"><div class="label">Commandes</div><div class="value orange" id="stat-orders">0</div></div>
+    <div class="stat-card"><div class="label">Fiches</div><div class="value accent" id="stat-listings">0</div></div>
   </div>
-
-  <!-- LAUNCH TOP 10 -->
-  <div id="page-launch" class="page">
-    <div class="card" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #ff6b35">
-      <div class="card-title" style="color:#ff6b35;font-size:22px">🚀 Les 10 produits à lancer EN PREMIER</div>
-      <div class="card-subtitle">Filtrés par : marge ≥ 40%, poids ≤ 500g (shipping easy), concurrence &lt; 40 vendeurs, score ≥ 70. Chaque fiche est prête-à-poster : titre Shopee optimisé VN, hook ad, liens sourcing.</div>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn btn-success" onclick="refreshLaunch()">🔄 Recalculer</button>
-        <button class="btn" onclick="copyLaunchReport()" style="background:#2a2a4e">📋 Copier le rapport complet</button>
-      </div>
-    </div>
-    <div id="launch-list"></div>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:8px">Workflow dropshipping sans entrepôt</div>
+    <div class="card-subtitle">Ton flux de travail type pour chaque produit</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Étape</th><th>Action</th><th>Outil</th></tr></thead>
+      <tbody>
+        <tr><td>1. Recherche</td><td>Trouver une niche rentable</td><td><span class="badge accent">Niches</span></td></tr>
+        <tr><td>2. Sourcing</td><td>Trouver le produit sur 1688</td><td><span class="badge accent">Calc 1688</span></td></tr>
+        <tr><td>3. Marge</td><td>Calculer ton coût de revient</td><td><span class="badge accent">Calc 1688</span></td></tr>
+        <tr><td>4. Listing</td><td>Créer fiche Shopee optimisée</td><td><span class="badge accent">Listing</span></td></tr>
+        <tr><td>5. Vente</td><td>Client commande → tu commandes 1688</td><td><span class="badge orange">Commandes</span></td></tr>
+        <tr><td>6. SAV</td><td>Répondre vite aux clients</td><td><span class="badge accent">Réponses</span></td></tr>
+      </tbody>
+    </table></div>
   </div>
-
-  <!-- NICHE ANALYZER -->
-  <div id="page-niche" class="page">
-    <div class="card">
-      <div class="card-title">Analyseur de niches</div>
-      <div class="card-subtitle">Évalue le potentiel d'une niche avec un score de rentabilité</div>
-      <div class="info-note">Score basé sur : demande (avis concurrents), concurrence (nb vendeurs), marge potentielle, saisonnalité, poids/logistique. Un score > 70 = niche à tester.</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Nom de la niche</label><input type="text" id="n-name" placeholder="Ex: Écouteurs Bluetooth gaming"></div>
-        <div class="form-group"><label>Mot-clé VN (Shopee search)</label><input type="text" id="n-keyword" placeholder="tai nghe bluetooth gaming"></div>
-        <div class="form-group"><label>Prix vente moyen concurrent (₫)</label><input type="number" id="n-price" placeholder="200000"></div>
-        <div class="form-group"><label>Prix 1688 estimé (₫)</label><input type="number" id="n-cost" placeholder="60000"></div>
-        <div class="form-group"><label>Nb d'avis top vendeur (demande)</label><input type="number" id="n-reviews" placeholder="500"></div>
-        <div class="form-group"><label>Nb de vendeurs (concurrence)</label><input type="number" id="n-sellers" placeholder="50"></div>
-        <div class="form-group"><label>Poids du produit (g)</label><input type="number" id="n-weight" placeholder="100"></div>
-        <div class="form-group"><label>Saisonnalité</label>
-          <select id="n-season"><option value="1">Toute l'année</option><option value="0.7">Saisonnier</option><option value="1.2">Trending maintenant</option></select>
-        </div>
-      </div>
-      <button class="btn btn-success" onclick="analyzeNiche()">Analyser la niche</button>
-      <div id="niche-result"></div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Top niches à surveiller</div>
+      <button class="btn btn-outline btn-sm" onclick="resetAllData()">🔄 Reset DB</button>
     </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Niches sauvegardées</div></div>
-      <div id="niches-list"></div>
-    </div>
+    <div id="dashboard-niches"></div>
   </div>
-
-  <!-- LISTING GENERATOR -->
-  <div id="page-listing" class="page">
-    <div class="card">
-      <div class="card-title">Générateur de fiche produit (vietnamien)</div>
-      <div class="card-subtitle">Génère titre SEO, description, bullet points pour Shopee VN</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Type de produit</label>
-          <select id="l-type">
-            <option value="electronics">Électronique / Gadget</option>
-            <option value="fashion">Mode / Accessoires</option>
-            <option value="home">Maison / Déco</option>
-            <option value="beauty">Beauté / Cosmétique</option>
-            <option value="kids">Enfants / Jouets</option>
-            <option value="phone">Téléphone / Accessoires tel</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Marque (optionnel)</label><input type="text" id="l-brand" placeholder="No brand / OEM"></div>
-        <div class="form-group"><label>Nom court produit</label><input type="text" id="l-name" placeholder="Écouteurs Bluetooth i12"></div>
-        <div class="form-group"><label>Prix (₫)</label><input type="number" id="l-price" placeholder="149000"></div>
-        <div class="form-group full"><label>Caractéristiques principales (séparées par virgule)</label><input type="text" id="l-features" placeholder="bluetooth 5.0, autonomie 4h, tactile, anti-bruit, étanche IPX4"></div>
-        <div class="form-group full"><label>Couleurs / variantes disponibles</label><input type="text" id="l-variants" placeholder="Blanc, Noir, Rose"></div>
-      </div>
-      <button class="btn btn-success" onclick="generateListing()">Générer la fiche</button>
-      <div id="listing-result"></div>
-    </div>
-  </div>
-
-  <!-- PRICE MONITOR -->
-  <div id="page-monitor" class="page">
-    <div class="card">
-      <div class="card-title">Monitoring des prix concurrents</div>
-      <div class="card-subtitle">Suis les prix de tes concurrents dans le temps</div>
-      <div class="info-note">À chaque nouveau relevé, l'app calcule la variation et te dit si le marché monte ou descend. Fréquence recommandée : 2-3× par semaine.</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Produit surveillé</label><input type="text" id="m-product" placeholder="Écouteurs Bluetooth i12"></div>
-        <div class="form-group"><label>Nom concurrent</label><input type="text" id="m-competitor" placeholder="Shop ABC"></div>
-        <div class="form-group"><label>Prix actuel (₫)</label><input type="number" id="m-price" placeholder="159000"></div>
-        <div class="form-group"><label>Plateforme</label>
-          <select id="m-platform"><option>Shopee</option><option>Lazada</option><option>Tiki</option></select>
-        </div>
-        <div class="form-group full"><label>Lien produit (optionnel)</label><input type="text" id="m-url" placeholder="https://shopee.vn/..."></div>
-      </div>
-      <button class="btn btn-success" onclick="addMonitor()">Ajouter un relevé</button>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Historique des relevés</div></div>
-      <div id="monitor-list"></div>
-    </div>
-  </div>
-
-  <!-- 1688 CALCULATOR -->
-  <div id="page-calc1688" class="page">
-    <div class="card">
-      <div class="card-title">Calculateur de commande 1688</div>
-      <div class="card-subtitle">De Yuan chinois (¥) à ton coût de revient livré à ton client VN</div>
-      <div class="info-note">Formule : (Prix ¥ × taux VND) + shipping 1688 domestique + shipping CN→VN + commission agent + douane + livraison VN client = ton coût final</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Prix 1688 (¥)</label><input type="number" id="c-yuan" placeholder="25" oninput="calc1688()"></div>
-        <div class="form-group"><label>Taux ¥ → ₫</label><input type="number" id="c-rate" value="3500" oninput="calc1688()"></div>
-        <div class="form-group"><label>Quantité</label><input type="number" id="c-qty" value="1" oninput="calc1688()"></div>
-        <div class="form-group"><label>Shipping 1688→entrepôt (¥/unité)</label><input type="number" id="c-cn-ship" value="2" oninput="calc1688()"></div>
-        <div class="form-group"><label>Shipping CN→VN (₫/kg)</label><input type="number" id="c-intl-ship" value="35000" oninput="calc1688()"></div>
-        <div class="form-group"><label>Poids unité (g)</label><input type="number" id="c-weight" value="100" oninput="calc1688()"></div>
-        <div class="form-group"><label>Commission agent (%)</label><input type="number" id="c-agent" value="5" oninput="calc1688()"></div>
-        <div class="form-group"><label>Douane (%)</label><input type="number" id="c-customs" value="10" oninput="calc1688()"></div>
-        <div class="form-group"><label>Livraison VN→client (₫)</label><input type="number" id="c-vn-ship" value="25000" oninput="calc1688()"></div>
-        <div class="form-group"><label>Prix de vente Shopee (₫)</label><input type="number" id="c-sell" placeholder="200000" oninput="calc1688()"></div>
-      </div>
-      <div id="calc1688-result" class="calc-result"><p style="color:var(--text2)">Remplis les champs pour calculer.</p></div>
-    </div>
-  </div>
-
-  <!-- CUSTOMER REPLIES -->
-  <div id="page-replies" class="page">
-    <div class="card">
-      <div class="card-title">Réponses client automatisées</div>
-      <div class="card-subtitle">Templates de messages Shopee en vietnamien pour les questions fréquentes</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Type de message</label>
-          <select id="r-type" onchange="generateReply()">
-            <option value="welcome">Accueil / Bienvenue</option>
-            <option value="shipping">Délai de livraison</option>
-            <option value="stock">Stock disponible</option>
-            <option value="variants">Variantes / Couleurs</option>
-            <option value="size">Tailles / Dimensions</option>
-            <option value="return">Retour / Échange</option>
-            <option value="defect">Produit défectueux</option>
-            <option value="discount">Demande de réduction</option>
-            <option value="thanks">Remerciement après achat</option>
-            <option value="review">Demande d'avis</option>
-            <option value="delay">Retard de livraison</option>
-            <option value="wrong">Mauvais produit reçu</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Nom du produit (optionnel)</label><input type="text" id="r-product" placeholder="Écouteurs i12" oninput="generateReply()"></div>
-        <div class="form-group"><label>Délai livraison (jours)</label><input type="number" id="r-days" value="12" oninput="generateReply()"></div>
-        <div class="form-group"><label>Ton du message</label>
-          <select id="r-tone" onchange="generateReply()">
-            <option value="polite">Poli standard</option>
-            <option value="friendly">Amical / chaleureux</option>
-            <option value="formal">Formel / professionnel</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn btn-success" onclick="generateReply()">Générer la réponse</button>
-      <div id="reply-result"></div>
-    </div>
-  </div>
-
-  <!-- TRACKER -->
-  <div id="page-tracker" class="page">
-    <div class="card">
-      <div class="card-header"><div class="card-title">Ajouter un produit</div></div>
-      <div class="form-grid">
-        <div class="form-group"><label>Nom</label><input type="text" id="track-name"></div>
-        <div class="form-group"><label>Coût réel (₫)</label><input type="number" id="track-buy"></div>
-        <div class="form-group"><label>Source</label><select id="track-buy-src"><option>1688</option><option>AliExpress</option><option>Taobao</option></select></div>
-        <div class="form-group"><label>Prix vente (₫)</label><input type="number" id="track-sell"></div>
-        <div class="form-group"><label>Vente sur</label><select id="track-sell-src"><option>Shopee</option><option>Lazada</option><option>Tiki</option></select></div>
-        <div class="form-group"><label>Lien</label><input type="text" id="track-url"></div>
-      </div>
-      <button class="btn btn-success" onclick="addProduct()">Ajouter</button>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Produits suivis</div>
-        <div><button class="btn btn-outline btn-sm" onclick="exportData()">Exporter CSV</button></div>
-      </div>
-      <div id="tracker-table"></div>
-    </div>
-  </div>
-
 </div>
+
+<!-- ===== LAUNCH TOP 10 ===== -->
+<div id="page-launch" class="page">
+  <div class="card" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #ff6b35">
+    <div class="card-title" style="color:#ff6b35;font-size:20px">🚀 Les 10 produits à lancer EN PREMIER</div>
+    <div class="card-subtitle">Filtrés par : marge ≥ 40%, poids ≤ 500g, concurrence &lt; 40, score ≥ 70. Fiche prête à poster + liens sourcing directs.</div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn btn-success" onclick="refreshLaunch()">🔄 Recalculer</button>
+      <button class="btn" onclick="copyLaunchReport()" style="background:#2a2a4e">📋 Rapport complet</button>
+    </div>
+  </div>
+  <div id="launch-list"></div>
+</div>
+
+<!-- ===== COMMANDES ===== -->
+<div id="page-commandes" class="page">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🛒 Gestionnaire de commandes</div>
+        <div class="card-subtitle">Suivi de chaque commande de la réception au client</div>
+      </div>
+      <button class="btn btn-success" onclick="openOrderModal()">+ Nouvelle commande</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-sm btn-outline" onclick="filterOrders('all')" id="filter-all" style="border-color:var(--accent);color:var(--accent2)">Toutes</button>
+      <button class="btn btn-sm btn-outline" onclick="filterOrders('pending')" id="filter-pending">⏳ En attente</button>
+      <button class="btn btn-sm btn-outline" onclick="filterOrders('ordered')" id="filter-ordered">📦 Commandé</button>
+      <button class="btn btn-sm btn-outline" onclick="filterOrders('shipped')" id="filter-shipped">🚚 Expédié</button>
+      <button class="btn btn-sm btn-outline" onclick="filterOrders('delivered')" id="filter-delivered">✅ Livré</button>
+      <button class="btn btn-sm btn-outline" onclick="filterOrders('issue')" id="filter-issue">⚠️ Problème</button>
+    </div>
+    <div id="orders-list"></div>
+  </div>
+  <div class="card" style="background:rgba(108,92,231,.05);border-color:var(--accent)">
+    <div class="card-title" style="margin-bottom:10px">📋 Workflow commande step by step</div>
+    <ol style="padding-left:20px;line-height:2;color:var(--text2);font-size:14px">
+      <li>Client commande sur <b style="color:var(--text)">Shopee/Lazada</b></li>
+      <li>Clique <b style="color:#ff6b00">Ouvrir 1688</b> → recherche le produit</li>
+      <li>Passe la commande chez le fournisseur (ton adresse en transit)</li>
+      <li>Mets le statut sur <b style="color:var(--accent2)">Commandé</b></li>
+      <li>Quand tu reçois → réemballe → envoie au client → statut <b style="color:#64a0ff">Expédié</b></li>
+      <li>Client confirme réception → statut <b style="color:var(--green)">Livré</b> 🎉</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ===== NICHE ANALYZER ===== -->
+<div id="page-niche" class="page">
+  <div class="card">
+    <div class="card-title">Analyseur de niches</div>
+    <div class="card-subtitle">Score de rentabilité — un score > 70 = niche à tester</div>
+    <div class="info-note">Score basé sur : marge (35%), demande / avis (25%), concurrence nb vendeurs (20%), poids/logistique (10%), saisonnalité (10%).</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nom de la niche</label><input type="text" id="n-name" placeholder="Ex: Écouteurs Bluetooth gaming"></div>
+      <div class="form-group"><label>Mot-clé VN (Shopee)</label><input type="text" id="n-keyword" placeholder="tai nghe bluetooth gaming"></div>
+      <div class="form-group"><label>Prix vente moyen concurrent (₫)</label><input type="number" id="n-price" placeholder="200000"></div>
+      <div class="form-group"><label>Prix 1688 estimé (₫)</label><input type="number" id="n-cost" placeholder="60000"></div>
+      <div class="form-group"><label>Nb d'avis top vendeur</label><input type="number" id="n-reviews" placeholder="500"></div>
+      <div class="form-group"><label>Nb de vendeurs</label><input type="number" id="n-sellers" placeholder="50"></div>
+      <div class="form-group"><label>Poids (g)</label><input type="number" id="n-weight" placeholder="100"></div>
+      <div class="form-group"><label>Saisonnalité</label>
+        <select id="n-season"><option value="1">Toute l'année</option><option value="0.7">Saisonnier</option><option value="1.2">Trending maintenant</option></select>
+      </div>
+    </div>
+    <button class="btn btn-success" onclick="analyzeNiche()">Analyser la niche</button>
+    <div id="niche-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Niches sauvegardées</div></div>
+    <div id="niches-list"></div>
+  </div>
+</div>
+
+<!-- ===== LISTING GENERATOR ===== -->
+<div id="page-listing" class="page">
+  <div class="card">
+    <div class="card-title">Générateur de fiche produit</div>
+    <div class="card-subtitle">Titre SEO, description, bullet points pour Shopee VN</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Type de produit</label>
+        <select id="l-type">
+          <option value="electronics">Électronique / Gadget</option>
+          <option value="fashion">Mode / Accessoires</option>
+          <option value="home">Maison / Déco</option>
+          <option value="beauty">Beauté / Cosmétique</option>
+          <option value="kids">Enfants / Jouets</option>
+          <option value="phone">Téléphone / Accessoires</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Marque (optionnel)</label><input type="text" id="l-brand" placeholder="No brand / OEM"></div>
+      <div class="form-group"><label>Nom court produit</label><input type="text" id="l-name" placeholder="Écouteurs Bluetooth i12"></div>
+      <div class="form-group"><label>Prix (₫)</label><input type="number" id="l-price" placeholder="149000"></div>
+      <div class="form-group full"><label>Caractéristiques (séparées par virgule)</label><input type="text" id="l-features" placeholder="bluetooth 5.0, autonomie 4h, tactile, anti-bruit"></div>
+      <div class="form-group full"><label>Couleurs / variantes</label><input type="text" id="l-variants" placeholder="Blanc, Noir, Rose"></div>
+    </div>
+    <button class="btn btn-success" onclick="generateListing()">Générer la fiche</button>
+    <div id="listing-result"></div>
+  </div>
+</div>
+
+<!-- ===== PRICE MONITOR ===== -->
+<div id="page-monitor" class="page">
+  <div class="card">
+    <div class="card-title">Monitoring des prix concurrents</div>
+    <div class="card-subtitle">Suis les prix dans le temps — 2-3× par semaine recommandé</div>
+    <div class="info-note">À chaque relevé, l'app calcule la variation et te dit si le marché monte ou descend.</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Produit surveillé</label><input type="text" id="m-product" placeholder="Écouteurs Bluetooth i12"></div>
+      <div class="form-group"><label>Nom concurrent</label><input type="text" id="m-competitor" placeholder="Shop ABC"></div>
+      <div class="form-group"><label>Prix actuel (₫)</label><input type="number" id="m-price" placeholder="159000"></div>
+      <div class="form-group"><label>Plateforme</label>
+        <select id="m-platform"><option>Shopee</option><option>Lazada</option><option>Tiki</option></select>
+      </div>
+      <div class="form-group full"><label>Lien produit (optionnel)</label><input type="text" id="m-url" placeholder="https://shopee.vn/..."></div>
+    </div>
+    <button class="btn btn-success" onclick="addMonitor()">Ajouter un relevé</button>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Historique des relevés</div></div>
+    <div class="table-wrap" id="monitor-list"></div>
+  </div>
+</div>
+
+<!-- ===== 1688 CALCULATOR ===== -->
+<div id="page-calc1688" class="page">
+  <div class="card">
+    <div class="card-title">Calculateur de commande 1688 <span style="font-size:11px;background:#22c55e;color:#000;padding:2px 8px;border-radius:10px;vertical-align:middle;margin-left:6px">v2 — frais réels VN</span></div>
+    <div class="card-subtitle">De Yuan chinois (¥) à ton coût de revient livré au client VN — inclut TVA 10%, consolidation, buffer retours, break-even</div>
+    <div class="info-note">💡 <b>v2</b> : ajoute TVA (10%), frais de consolidation fixe, buffer pour les retours/défauts, et affiche une table de scénarios à ±10%/±20% du prix.</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Prix 1688 (¥)</label><input type="number" id="c-yuan" placeholder="25" oninput="calc1688()"></div>
+      <div class="form-group"><label>Taux ¥ → ₫</label><input type="number" id="c-rate" value="3500" oninput="calc1688()"></div>
+      <div class="form-group"><label>Quantité</label><input type="number" id="c-qty" value="1" oninput="calc1688()"></div>
+      <div class="form-group"><label>Shipping 1688→entrepôt (¥/u)</label><input type="number" id="c-cn-ship" value="2" oninput="calc1688()"></div>
+      <div class="form-group"><label>Shipping CN→VN (₫/kg)</label><input type="number" id="c-intl-ship" value="35000" oninput="calc1688()"></div>
+      <div class="form-group"><label>Poids unité (g)</label><input type="number" id="c-weight" value="100" oninput="calc1688()"></div>
+      <div class="form-group"><label>Commission agent (%)</label><input type="number" id="c-agent" value="5" oninput="calc1688()"></div>
+      <div class="form-group"><label>Douane (%)</label><input type="number" id="c-customs" value="10" oninput="calc1688()"></div>
+      <div class="form-group"><label>TVA VN (%)</label><input type="number" id="c-vat" value="10" oninput="calc1688()"></div>
+      <div class="form-group"><label>Consolidation (₫/cde)</label><input type="number" id="c-consol" value="50000" oninput="calc1688()"></div>
+      <div class="form-group"><label>Taux retours/défauts (%)</label><input type="number" id="c-returns" value="4" oninput="calc1688()"></div>
+      <div class="form-group"><label>Livraison VN→client (₫)</label><input type="number" id="c-vn-ship" value="25000" oninput="calc1688()"></div>
+      <div class="form-group"><label>Frais Shopee (%)</label><input type="number" id="c-shopee" value="7.5" step="0.1" oninput="calc1688()"></div>
+      <div class="form-group"><label>Prix de vente Shopee (₫)</label><input type="number" id="c-sell" placeholder="200000" oninput="calc1688()"></div>
+    </div>
+    <div id="calc1688-result" class="calc-result"><p style="color:var(--text2)">Remplis les champs pour calculer.</p></div>
+  </div>
+</div>
+
+<!-- ===== CUSTOMER REPLIES ===== -->
+<div id="page-replies" class="page">
+  <div class="card">
+    <div class="card-title">Réponses client automatisées</div>
+    <div class="card-subtitle">Templates de messages Shopee en vietnamien — copie-colle dans le chat</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Type de message</label>
+        <select id="r-type" onchange="generateReply()">
+          <option value="welcome">Accueil / Bienvenue</option>
+          <option value="shipping">Délai de livraison</option>
+          <option value="stock">Stock disponible</option>
+          <option value="variants">Variantes / Couleurs</option>
+          <option value="size">Tailles / Dimensions</option>
+          <option value="return">Retour / Échange</option>
+          <option value="defect">Produit défectueux</option>
+          <option value="discount">Demande de réduction</option>
+          <option value="thanks">Remerciement après achat</option>
+          <option value="review">Demande d'avis 5⭐</option>
+          <option value="delay">Retard de livraison</option>
+          <option value="wrong">Mauvais produit reçu</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Nom du produit</label><input type="text" id="r-product" placeholder="Écouteurs i12" oninput="generateReply()"></div>
+      <div class="form-group"><label>Délai livraison (jours)</label><input type="number" id="r-days" value="12" oninput="generateReply()"></div>
+      <div class="form-group"><label>Ton du message</label>
+        <select id="r-tone" onchange="generateReply()">
+          <option value="polite">Poli standard</option>
+          <option value="friendly">Amical / chaleureux</option>
+          <option value="formal">Formel / professionnel</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-success" onclick="generateReply()">Générer</button>
+    <div id="reply-result"></div>
+  </div>
+</div>
+
+<!-- ===== TRACKER ===== -->
+<div id="page-tracker" class="page">
+  <div class="card">
+    <div class="card-header"><div class="card-title">Ajouter un produit au tracker</div></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nom</label><input type="text" id="track-name"></div>
+      <div class="form-group"><label>Coût réel (₫)</label><input type="number" id="track-buy"></div>
+      <div class="form-group"><label>Source</label><select id="track-buy-src"><option>1688</option><option>AliExpress</option><option>Taobao</option></select></div>
+      <div class="form-group"><label>Prix vente (₫)</label><input type="number" id="track-sell"></div>
+      <div class="form-group"><label>Vente sur</label><select id="track-sell-src"><option>Shopee</option><option>Lazada</option><option>Tiki</option></select></div>
+      <div class="form-group"><label>Lien</label><input type="text" id="track-url"></div>
+    </div>
+    <button class="btn btn-success" onclick="addProduct()">Ajouter</button>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Produits suivis</div>
+      <button class="btn btn-outline btn-sm" onclick="exportData()">📥 Exporter CSV</button>
+    </div>
+    <div class="table-wrap" id="tracker-table"></div>
+  </div>
+</div>
+
+</div><!-- /container -->
 
 <script src="seed-products.js"></script>
 <script>
-// === STORAGE ===
-const KEYS = { products: 'vn_products', niches: 'vn_niches', monitors: 'vn_monitors', listings: 'vn_listings' };
+// ===== STORAGE =====
+const KEYS = { products:'vn_products', niches:'vn_niches', monitors:'vn_monitors', listings:'vn_listings', orders:'vn_orders' };
 function load(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } }
 function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
 function fmt(n) { return Math.round(n).toLocaleString('vi-VN') + ' ₫'; }
 
-// === AUTO-SEED : 200+ produits pré-chargés (charge depuis seed-products.js) ===
+// ===== TOAST SYSTEM =====
+function toast(msg, type='success', duration=3000) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(), 300); }, duration);
+}
+
+// ===== SEED =====
 function seedIfEmpty() {
   if (typeof SEED_NICHES === 'undefined') { console.warn('seed-products.js non chargé'); return; }
   let seeded = false;
   if (load(KEYS.niches).length === 0 && SEED_NICHES.length > 0) {
     const niches = SEED_NICHES.map((n, i) => ({
-      id: Date.now() + i,
-      name: n.name,
-      keyword: n.keyword,
-      price: n.price,
-      cost: n.cost,
-      reviews: n.reviews,
-      sellers: n.sellers,
-      weight: n.weight,
-      score: n.score,
-      verdict: n.verdict,
-      date: new Date().toLocaleDateString('fr')
+      id: Date.now() + i, name: n.name, keyword: n.keyword,
+      price: n.price, cost: n.cost, reviews: n.reviews,
+      sellers: n.sellers, weight: n.weight, score: n.score,
+      verdict: n.verdict, date: new Date().toLocaleDateString('fr')
     }));
     save(KEYS.niches, niches);
     seeded = true;
@@ -337,52 +545,192 @@ function seedIfEmpty() {
     const products = SEED_TRACKER.map((p, i) => {
       const fee = p.sell * 0.075;
       const profit = p.sell - p.buy - fee;
-      const margin = profit / p.sell * 100;
       return {
-        id: Date.now() + 100000 + i,
-        name: p.name,
-        buy: p.buy,
-        sell: p.sell,
-        buySrc: p.buySrc,
-        sellSrc: p.sellSrc,
-        url: p.url,
-        profit: Math.round(profit),
-        margin: margin.toFixed(1),
+        id: Date.now() + 100000 + i, name: p.name, buy: p.buy, sell: p.sell,
+        buySrc: p.buySrc, sellSrc: p.sellSrc, url: p.url,
+        profit: Math.round(profit), margin: (profit/p.sell*100).toFixed(1),
         date: new Date().toLocaleDateString('fr')
       };
     });
     save(KEYS.products, products);
     seeded = true;
   }
-  if (seeded) console.log('✅ Base pré-chargée : ' + (SEED_NICHES?.length||0) + ' niches + ' + (SEED_TRACKER?.length||0) + ' produits en tracker');
+  if (seeded) console.log('✅ Base pré-chargée : ' + (SEED_NICHES?.length||0) + ' niches');
 }
 function resetAllData() {
-  if (!confirm('Effacer TOUTES les données (niches, tracker, fiches, monitoring) et recharger la base seed ?')) return;
+  if (!confirm('Effacer TOUTES les données et recharger la base seed ?')) return;
   Object.values(KEYS).forEach(k => localStorage.removeItem(k));
   seedIfEmpty();
-  refreshNiches(); refreshTracker(); refreshDash();
-  alert('Base rechargée avec 200+ produits.');
+  refreshNiches(); refreshTracker(); refreshDash(); refreshOrders();
+  toast('Base rechargée avec 200+ produits 🔄');
 }
 
-// === NAV ===
-document.querySelectorAll('.nav-tab').forEach(tab => {
-  tab.addEventListener('click', () => showPage(tab.dataset.page, tab));
-});
-function showPage(page, btn) {
+// ===== NAV =====
+function showPage(page, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab, .bottom-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  if (btn) btn.classList.add('active');
+  document.querySelectorAll('[data-page="'+page+'"]').forEach(t => t.classList.add('active'));
   if (page === 'dashboard') refreshDash();
   if (page === 'tracker') refreshTracker();
   if (page === 'niche') refreshNiches();
   if (page === 'monitor') refreshMonitors();
   if (page === 'launch') refreshLaunch();
+  if (page === 'commandes') refreshOrders();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('[data-page]').forEach(el => {
+  el.addEventListener('click', () => showPage(el.dataset.page, el));
+});
+
+// ===== ORDER MODAL =====
+let _currentOrderFilter = 'all';
+
+function openOrderModal(prefill) {
+  ['om-product','om-client','om-phone','om-address','om-cost','om-sell','om-notes','om-url'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('om-qty').value = 1;
+  document.getElementById('om-source').value = '1688';
+  if (prefill) {
+    if (prefill.name) document.getElementById('om-product').value = prefill.name;
+    if (prefill.cost) document.getElementById('om-cost').value = prefill.cost;
+    if (prefill.price) document.getElementById('om-sell').value = prefill.price;
+    if (prefill.keyword) {
+      const link = `https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(prefill.keyword)}`;
+      document.getElementById('om-1688-link').href = link;
+      document.getElementById('om-url').value = link;
+    }
+  } else {
+    document.getElementById('om-1688-link').href = 'https://1688.com';
+  }
+  document.getElementById('order-modal').classList.add('open');
+  document.getElementById('om-product').focus();
+}
+function closeOrderModal() { document.getElementById('order-modal').classList.remove('open'); }
+document.getElementById('order-modal').addEventListener('click', function(e) { if (e.target === this) closeOrderModal(); });
+
+function saveOrder() {
+  const product = document.getElementById('om-product').value.trim();
+  const client = document.getElementById('om-client').value.trim();
+  if (!product) { toast('Entre au moins le nom du produit', 'error'); return; }
+  const o = {
+    id: Date.now(),
+    product, client,
+    phone: document.getElementById('om-phone').value.trim(),
+    address: document.getElementById('om-address').value.trim(),
+    cost: +document.getElementById('om-cost').value || 0,
+    sell: +document.getElementById('om-sell').value || 0,
+    qty: +document.getElementById('om-qty').value || 1,
+    source: document.getElementById('om-source').value,
+    url: document.getElementById('om-url').value.trim(),
+    notes: document.getElementById('om-notes').value.trim(),
+    status: 'pending',
+    date: new Date().toLocaleDateString('fr'),
+    dateISO: new Date().toISOString()
+  };
+  const orders = load(KEYS.orders);
+  orders.unshift(o);
+  save(KEYS.orders, orders);
+  closeOrderModal();
+  refreshOrders();
+  refreshDash();
+  toast('✅ Commande enregistrée pour ' + (client || product));
+  showPage('commandes');
 }
 
-// === LAUNCH TOP 10 ===
+function updateOrderStatus(id, status) {
+  const orders = load(KEYS.orders).map(o => o.id === id ? {...o, status} : o);
+  save(KEYS.orders, orders);
+  refreshOrders();
+  const labels = { pending:'En attente', ordered:'Commandé', shipped:'Expédié', delivered:'Livré', issue:'Problème' };
+  toast('Statut → ' + (labels[status] || status));
+}
+function deleteOrder(id) {
+  if (!confirm('Supprimer cette commande ?')) return;
+  save(KEYS.orders, load(KEYS.orders).filter(o => o.id !== id));
+  refreshOrders(); refreshDash();
+  toast('Commande supprimée', 'warning');
+}
+
+function filterOrders(filter) {
+  _currentOrderFilter = filter;
+  document.querySelectorAll('[id^="filter-"]').forEach(b => {
+    b.style.borderColor = ''; b.style.color = '';
+  });
+  const active = document.getElementById('filter-' + filter);
+  if (active) { active.style.borderColor = 'var(--accent)'; active.style.color = 'var(--accent2)'; }
+  refreshOrders();
+}
+
+function refreshOrders() {
+  const all = load(KEYS.orders);
+  const filtered = _currentOrderFilter === 'all' ? all : all.filter(o => o.status === _currentOrderFilter);
+  const c = document.getElementById('orders-list');
+  if (!c) return;
+  if (!filtered.length) {
+    c.innerHTML = '<div class="empty-state"><h3>' + (all.length ? 'Aucune commande dans ce filtre' : 'Aucune commande') + '</h3><p>' + (all.length ? 'Change de filtre ou ajoute une commande.' : 'Utilise le bouton "Nouvelle commande" ou le bouton 🛒 dans Top 10.') + '</p></div>';
+    return;
+  }
+  const statusLabels = { pending:'⏳ En attente', ordered:'📦 Commandé', shipped:'🚚 Expédié', delivered:'✅ Livré', issue:'⚠️ Problème' };
+  const statusColors = { pending:'orange', ordered:'accent', shipped:'blue', delivered:'green', issue:'red' };
+  c.innerHTML = filtered.map(o => {
+    const profit = o.sell && o.cost ? (o.sell - o.cost - o.sell*0.075) * o.qty : 0;
+    const sourceUrl = o.url || `https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(o.product)}`;
+    return `
+    <div class="order-card status-${o.status}">
+      <div class="order-header">
+        <div>
+          <div style="font-weight:700;font-size:15px">${o.product}</div>
+          ${o.client ? `<div style="color:var(--text2);font-size:13px;margin-top:2px">👤 ${o.client}${o.phone ? ' · '+o.phone : ''}</div>` : ''}
+        </div>
+        <span class="badge ${statusColors[o.status]||'accent'}">${statusLabels[o.status]||o.status}</span>
+      </div>
+      <div class="order-meta">
+        ${o.address ? `<span>📍 ${o.address}</span>` : ''}
+        ${o.cost ? `<span>💰 Coût: ${fmt(o.cost)}</span>` : ''}
+        ${o.sell ? `<span>💵 Vente: ${fmt(o.sell)}</span>` : ''}
+        ${profit ? `<span style="color:${profit>0?'var(--green)':'var(--red)'}">📈 Profit: ${profit>0?'+':''}${fmt(profit)}</span>` : ''}
+        ${o.qty > 1 ? `<span>✕${o.qty}</span>` : ''}
+        ${o.notes ? `<span>📝 ${o.notes}</span>` : ''}
+        <span>📅 ${o.date}</span>
+      </div>
+      <div class="order-actions">
+        <a href="${sourceUrl}" target="_blank" class="btn btn-sm" style="background:#ff6b00">🇨🇳 ${o.source||'1688'}</a>
+        ${o.status === 'pending' ? `<button class="btn btn-sm" style="background:rgba(162,155,254,.15);color:var(--accent2)" onclick="updateOrderStatus(${o.id},'ordered')">📦 Marqué commandé</button>` : ''}
+        ${o.status === 'ordered' ? `<button class="btn btn-sm" style="background:rgba(100,160,255,.15);color:#64a0ff" onclick="updateOrderStatus(${o.id},'shipped')">🚚 Marqué expédié</button>` : ''}
+        ${o.status === 'shipped' ? `<button class="btn btn-sm" style="background:rgba(0,184,148,.15);color:var(--green)" onclick="updateOrderStatus(${o.id},'delivered')">✅ Marqué livré</button>` : ''}
+        ${o.status !== 'delivered' ? `<button class="btn btn-sm btn-outline" onclick="updateOrderStatus(${o.id},'issue')">⚠️ Problème</button>` : ''}
+        <button class="btn btn-sm" style="background:rgba(225,112,85,.1);color:var(--red)" onclick="deleteOrder(${o.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== SOURCING DATA (réel AliExpress VN — scraping du 14/04/2026) =====
+const SOURCING_DATA = [
+  { match: ['épilateur','ipl','laser portable'], name: 'IPL Hair Removal Portable Device', url: 'https://vi.aliexpress.com/item/1005006900982945.html', price: 701014, sold: '1000+', rating: 4.4, img: 'https://ae-pic-a1.aliexpress-media.com/kf/S0efc12f9cf1f4d5a947a69e19891764aC.jpg_480x480q75.jpg_.avif' },
+  { match: ['radar','détecteur vitesse','speed camera'], name: '79GHz Radar Vehicle Speed Detector', url: 'https://vi.aliexpress.com/item/1005007643053236.html', price: 586552, sold: '1000+', rating: 4.7, img: '' },
+  { match: ['ceinture sécurité','coussin gonflable','seatbelt'], name: 'Baby Pillow Car Seat Belt Shoulder Cushion', url: 'https://vi.aliexpress.com/item/1005007225583238.html', price: 28690, sold: '4000+', rating: 4.5, img: 'https://ae-pic-a1.aliexpress-media.com/kf/S1770714ca0d74d32a57008358c82d3f3G.jpg_480x480q75.jpg_.avif' },
+  { match: ['collier gps','chat chien','airtag','pet gps'], name: 'Cat Collar AirTag Compatible Reflective GPS', url: 'https://vi.aliexpress.com/item/1005008841493840.html', price: 22909, sold: '3000+', rating: 4.7, img: 'https://ae-pic-a1.aliexpress-media.com/kf/S960f3d2b7cf648a5b7bc8467a292ce20w.jpg_480x480q75.jpg_.avif' },
+  { match: ['camera recul','rearview','voiture hd'], name: '7" WIFI Rear View Camera 12V-24V', url: 'https://vi.aliexpress.com/item/1005005372414226.html', price: 634658, sold: '150', rating: 4.4, img: 'https://ae-pic-a1.aliexpress-media.com/kf/S123ef28ec0e5430f834adb588e2829172.jpg_480x480q75.jpg_.avif' },
+  { match: ['dynamométrique','torque wrench','clé précision'], name: 'Digital Precision Torque Wrench', url: 'https://vi.aliexpress.com/item/1005001585799490.html', price: 1224108, sold: 'N/A', rating: 4.4, img: 'https://ae-pic-a1.aliexpress-media.com/kf/Sfe37c6b4ed944357b5129275859215dbb.jpg_480x480q75.jpg_.avif' },
+  { match: ['chauffant','heated vest','gilet usb'], name: '9-zone USB Heated Vest (Women)', url: 'https://vi.aliexpress.com/item/1005007129358116.html', price: 768255, sold: '800+', rating: 4.4, img: 'https://ae-pic-a1.aliexpress-media.com/kf/Sd72cf6eb9fae451995ce1a131d9229a9b.jpg_480x480q75.jpg_.avif' },
+  { match: ['suspension scandinave','pendant light','luminaire'], name: 'Nordic Pendant Light Fixture', url: 'https://vi.aliexpress.com/item/1005005045637041.html', price: 1874126, sold: 'N/A', rating: 4.3, img: 'https://ae-pic-a1.aliexpress-media.com/kf/S0f365ddb6d8d4796a0d5ce52802423aed.jpg_480x480q75.jpg_.avif' },
+  { match: ['massage chien','pet hair','grooming glove','détente'], name: 'Pet Hair Grooming & Massage Glove', url: 'https://vi.aliexpress.com/item/1005008523310034.html', price: 28690, sold: '10000+', rating: 4.6, img: 'https://ae-pic-a1.aliexpress-media.com/kf/Sdd1513d36261465ba99e6da9ad12e22dk.jpg_480x480q75.jpg_.avif' },
+  { match: ['microphone','podcast mic','usb pod'], name: 'Gaming USB Condenser Podcast Microphone', url: 'https://vi.aliexpress.com/item/1005008678863752.html', price: 91525, sold: '1000+', rating: 4.7, img: 'https://ae-pic-a1.aliexpress-media.com/kf/Secd8bd5d30844bb9bd67819ffcf5eefbb.jpg_480x480q75.jpg_.avif' },
+];
+function getSourcing(name, keyword) {
+  const hay = (name + ' ' + (keyword||'')).toLowerCase();
+  for (const s of SOURCING_DATA) {
+    if (s.match.some(m => hay.includes(m))) return s;
+  }
+  return null;
+}
+
+// ===== LAUNCH TOP 10 =====
 function generateShopeeTitle(name, keyword) {
-  // Format VN Shopee: [keyword chính] + feature + modifier + năm 2026 (max ~60 chars)
   const modifiers = ['Cao Cấp', 'Chính Hãng', 'Giá Rẻ', 'Mới 2026', 'Loại Tốt', 'Full Box'];
   const m = modifiers[name.length % modifiers.length];
   const base = keyword.charAt(0).toUpperCase() + keyword.slice(1);
@@ -403,14 +751,14 @@ function generateHook(name, margin) {
 }
 function generateAudience(name) {
   const n = name.toLowerCase();
-  if (n.match(/ipl|beauté|cosm|épil|massage/)) return 'Femmes 22-40 ans, urbaines, TikTok/Instagram actifs';
-  if (n.match(/gps|radar|camera|voiture|auto|dyna/)) return 'Hommes 25-45 ans, conducteurs, passionnés tech';
-  if (n.match(/chat|chien|pet|animal/)) return 'Propriétaires d\'animaux, familles urbaines, 25-50 ans';
-  if (n.match(/enfant|jouet|kid|bébé/)) return 'Parents jeunes 25-40 ans, grands-parents, cadeaux';
-  if (n.match(/gaming|mic|usb|stream|podcast/)) return 'Gamers/Créateurs 18-35 ans, étudiants, télétravail';
-  if (n.match(/sport|muscu|fitness/)) return 'Sportifs 18-40 ans, self-care, home workout';
-  if (n.match(/lumi|déco|home|maison|suspension/)) return 'Jeunes couples 25-40 ans, déco Instagram, nouveaux propriétaires';
-  return 'Audience large VN urbaine 20-45 ans, actifs sur Shopee/TikTok Shop';
+  if (n.match(/ipl|beauté|cosm|épil|massage/)) return 'Femmes 22-40 ans, urbaines, TikTok/Instagram';
+  if (n.match(/gps|radar|camera|voiture|auto/)) return 'Hommes 25-45 ans, conducteurs, tech';
+  if (n.match(/chat|chien|pet|animal/)) return 'Propriétaires d\'animaux, familles 25-50 ans';
+  if (n.match(/enfant|jouet|kid|bébé/)) return 'Parents 25-40 ans, grands-parents, cadeaux';
+  if (n.match(/gaming|mic|usb|stream|podcast/)) return 'Gamers/Créateurs 18-35 ans, étudiants';
+  if (n.match(/sport|muscu|fitness/)) return 'Sportifs 18-40 ans, home workout';
+  if (n.match(/lumi|déco|home|maison/)) return 'Jeunes couples 25-40 ans, déco Instagram';
+  return 'Audience large VN urbaine 20-45 ans, Shopee/TikTok';
 }
 function buildShortlist() {
   const niches = load(KEYS.niches);
@@ -443,60 +791,109 @@ function refreshLaunch() {
     const search1688 = `https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(p.keyword)}`;
     const searchShopee = `https://shopee.vn/search?keyword=${encodeURIComponent(p.keyword)}`;
     const searchAliex = `https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(p.name)}`;
+    const searchTaobao = `https://s.taobao.com/search?q=${encodeURIComponent(p.keyword)}`;
     const rankColor = i < 3 ? '#ff6b35' : i < 6 ? '#f7931e' : '#5c5470';
+    const prefillJson = JSON.stringify({name:p.name, cost:p.cost, price:p.price, keyword:p.keyword}).replace(/"/g,'&quot;');
+    // ===== Sourcing réel (bloc affiché si produit trouvé sur AliExpress VN) =====
+    const src = getSourcing(p.name, p.keyword);
+    let sourcingBlock = '';
+    if (src) {
+      const realProfit = Math.round(p.price - src.price - p.price * 0.075 - 30000);
+      const realMargin = ((realProfit / p.price) * 100).toFixed(1);
+      const mColor = realMargin >= 40 ? '#22c55e' : realMargin >= 20 ? '#f7931e' : '#ef4444';
+      const costDelta = p.cost - src.price;
+      const deltaTxt = costDelta >= 0 ? `Économie vs estim. : ${fmt(costDelta)}` : `Surcoût vs estim. : ${fmt(-costDelta)}`;
+      sourcingBlock = `
+      <div style="margin-top:12px;padding:12px;background:linear-gradient(135deg,#0a1f0a,#0f0f1e);border-left:3px solid #22c55e;border-radius:6px">
+        <div style="color:#22c55e;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:8px">✓ SOURCING RÉEL ALIEXPRESS VN (14/04/2026)</div>
+        <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+          ${src.img ? `<img src="${src.img}" style="width:72px;height:72px;border-radius:6px;object-fit:cover;background:#222" alt="">` : ''}
+          <div style="flex:1;min-width:200px">
+            <div style="color:#fff;font-size:13px;font-weight:600">${src.name}</div>
+            <div style="color:#ddd;margin-top:4px;font-size:13px;display:flex;gap:10px;flex-wrap:wrap">
+              <span>💰 <b style="color:#4ade80">${fmt(src.price)}</b></span>
+              <span>🛒 ${src.sold} sold</span>
+              <span>⭐ ${src.rating}</span>
+            </div>
+            <div style="margin-top:6px;padding:6px 8px;background:#0b0b14;border-radius:4px;font-size:12px;color:${mColor}">
+              <b>Marge RÉELLE</b> : ${fmt(realProfit)} (${realMargin}%) <span style="color:#888">— ${deltaTxt}</span>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+              <a href="${src.url}" target="_blank" class="btn btn-sm" style="background:#e62e04">🔗 Voir AliExpress VN</a>
+              <button class="btn btn-sm btn-outline" onclick="copyText('${src.url}')">📋 URL</button>
+              <button class="btn btn-sm btn-outline" onclick="applyRealCost(${i}, ${src.price})">💾 Utiliser ce coût (${fmt(src.price)})</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    } else {
+      sourcingBlock = `<div style="margin-top:12px;padding:8px 10px;background:#0f0f1e;border-left:3px solid #555;border-radius:6px;font-size:12px;color:#888">ℹ️ Pas encore de sourcing réel pour ce produit. Clique sur 🔴 AliExpress ci-dessous pour rechercher.</div>`;
+    }
     return `
     <div class="card" style="border-left:4px solid ${rankColor}">
-      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
-        <div style="background:${rankColor};color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0">#${i+1}</div>
-        <div style="flex:1;min-width:280px">
-          <div style="font-size:18px;font-weight:700;color:#fff">${p.name}</div>
-          <div style="margin-top:4px"><code style="color:var(--accent2);font-size:14px">${p.keyword}</code></div>
-          <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
-            <span>💰 Coût : <b>${fmt(p.cost)}</b></span>
-            <span>💵 Vente : <b>${fmt(p.price)}</b></span>
-            <span style="color:#4ade80">📈 Profit : <b>${fmt(p.profit)}</b></span>
-            <span style="color:#4ade80">📊 Marge : <b>${p.marginPct}%</b></span>
+      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+        <div style="background:${rankColor};color:#fff;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0">#${i+1}</div>
+        <div style="flex:1;min-width:240px">
+          <div style="font-size:17px;font-weight:700">${p.name}</div>
+          <code style="color:var(--accent2);font-size:13px">${p.keyword}</code>
+          <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;font-size:13px">
+            <span>💰 ${fmt(p.cost)}</span>
+            <span>💵 ${fmt(p.price)}</span>
+            <span style="color:#4ade80">📈 +${fmt(p.profit)} (${p.marginPct}%)</span>
             <span>⚖️ ${p.weight}g</span>
             <span>🏪 ${p.sellers} vendeurs</span>
-            <span>⭐ Score <b>${p.score}/100</b></span>
+            <span>⭐ ${p.score}/100</span>
           </div>
         </div>
       </div>
-      <div style="margin-top:14px;padding:10px;background:#0f0f1e;border-radius:6px">
-        <div style="color:#ff6b35;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px">TITRE SHOPEE VN (copier-coller)</div>
-        <div style="font-family:monospace;color:#fff" id="title-${i}">${title}</div>
+      <div style="margin-top:12px;padding:10px;background:#0f0f1e;border-radius:6px">
+        <div style="color:#ff6b35;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px">TITRE SHOPEE VN</div>
+        <div style="font-family:monospace;color:#fff;font-size:13px" id="title-${i}">${title}</div>
       </div>
-      <div style="margin-top:10px;padding:10px;background:#0f0f1e;border-radius:6px">
-        <div style="color:#f7931e;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px">HOOK PUBLICITAIRE (TikTok/FB ads)</div>
-        <div style="color:#fff;font-style:italic">"${hook}"</div>
+      <div style="margin-top:8px;padding:10px;background:#0f0f1e;border-radius:6px">
+        <div style="color:#f7931e;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px">HOOK AD (TikTok/FB)</div>
+        <div style="color:#ddd;font-style:italic;font-size:13px">"${hook}"</div>
       </div>
-      <div style="margin-top:10px;padding:10px;background:#0f0f1e;border-radius:6px">
-        <div style="color:#a78bfa;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px">AUDIENCE CIBLE</div>
-        <div style="color:#fff">${audience}</div>
+      <div style="margin-top:8px;padding:10px;background:#0f0f1e;border-radius:6px">
+        <div style="color:#a78bfa;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px">AUDIENCE</div>
+        <div style="color:#ddd;font-size:13px">${audience}</div>
       </div>
+      ${sourcingBlock}
       <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
-        <a href="${search1688}" target="_blank" class="btn" style="background:#ff6b00;text-decoration:none;font-size:13px">🇨🇳 1688</a>
-        <a href="${searchAliex}" target="_blank" class="btn" style="background:#e62e04;text-decoration:none;font-size:13px">🔴 AliExpress</a>
-        <a href="${searchShopee}" target="_blank" class="btn" style="background:#ee4d2d;text-decoration:none;font-size:13px">🛒 Shopee VN</a>
-        <button class="btn" onclick="copyText('${title.replace(/'/g,"\\'")}')" style="background:#4ade80;color:#000;font-size:13px">📋 Copy titre</button>
-        <button class="btn" onclick="addToTracker(${JSON.stringify(p).replace(/"/g,'&quot;')})" style="background:#2a2a4e;font-size:13px">➕ Ajouter au Tracker</button>
+        <a href="${search1688}" target="_blank" class="btn btn-sm" style="background:#ff6b00">🇨🇳 1688</a>
+        <a href="${searchAliex}" target="_blank" class="btn btn-sm" style="background:#e62e04">🔴 AliExpress</a>
+        <a href="${searchTaobao}" target="_blank" class="btn btn-sm" style="background:#ff5500">🟠 Taobao</a>
+        <a href="${searchShopee}" target="_blank" class="btn btn-sm" style="background:#ee4d2d">🛒 Shopee VN</a>
+        <button class="btn btn-sm" onclick="copyText('${title.replace(/'/g,"\\'")}')" style="background:#4ade80;color:#000">📋 Titre</button>
+        <button class="btn btn-sm btn-success" onclick='openOrderModal(${prefillJson})'>🛒 Commander</button>
+        <button class="btn btn-sm btn-outline" onclick="addToTracker(${JSON.stringify(p).replace(/"/g,'&quot;')})">➕ Tracker</button>
       </div>
     </div>`;
   }).join('');
 }
-function copyText(t) { navigator.clipboard.writeText(t).then(() => alert('Copié : ' + t.slice(0,40) + '...')); }
+function copyText(t) {
+  navigator.clipboard.writeText(t).then(() => toast('📋 Copié : ' + t.slice(0,40)));
+}
+function applyRealCost(idx, newCost) {
+  const top = buildShortlist();
+  if (!top[idx]) return;
+  const target = top[idx];
+  const niches = load(KEYS.niches);
+  const match = niches.find(n => n.name === target.name);
+  if (!match) { toast('Niche introuvable', 'error'); return; }
+  match.cost = newCost;
+  save(KEYS.niches, niches);
+  toast('✅ Coût réel appliqué : ' + fmt(newCost));
+  refreshLaunch();
+  if (typeof renderNiches === 'function') renderNiches();
+}
 function addToTracker(n) {
   const products = load(KEYS.products);
   const fee = n.price * 0.075;
   const profit = n.price - n.cost - fee;
-  products.push({
-    id: Date.now(), name: n.name, buy: n.cost, sell: n.price,
-    buySrc: '1688', sellSrc: 'Shopee', url: '',
-    profit: Math.round(profit), margin: (profit/n.price*100).toFixed(1),
-    date: new Date().toLocaleDateString('fr')
-  });
+  products.push({ id: Date.now(), name: n.name, buy: n.cost, sell: n.price, buySrc: '1688', sellSrc: 'Shopee', url: '', profit: Math.round(profit), margin: (profit/n.price*100).toFixed(1), date: new Date().toLocaleDateString('fr') });
   save(KEYS.products, products);
-  alert('✅ ' + n.name + ' ajouté au Tracker');
+  toast('✅ ' + n.name + ' ajouté au Tracker');
 }
 function copyLaunchReport() {
   const top = buildShortlist();
@@ -506,11 +903,11 @@ function copyLaunchReport() {
     const aud = generateAudience(p.name);
     return `#${i+1} ${p.name}\n  Keyword VN: ${p.keyword}\n  Cost: ${fmt(p.cost)} → Sell: ${fmt(p.price)} = Profit ${fmt(p.profit)} (${p.marginPct}%)\n  Poids: ${p.weight}g | Concurrence: ${p.sellers} | Score: ${p.score}\n  Titre Shopee: ${title}\n  Hook: "${hook}"\n  Audience: ${aud}\n  1688: https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(p.keyword)}`;
   }).join('\n\n');
-  const header = `=== VN DROPSHIP — TOP 10 LAUNCH (${new Date().toLocaleDateString('fr')}) ===\n\n`;
-  navigator.clipboard.writeText(header + report).then(() => alert('📋 Rapport copié ! Colle-le où tu veux.'));
+  navigator.clipboard.writeText(`=== VN DROPSHIP — TOP 10 LAUNCH (${new Date().toLocaleDateString('fr')}) ===\n\n` + report)
+    .then(() => toast('📋 Rapport copié dans le presse-papier !'));
 }
 
-// === NICHE ANALYZER ===
+// ===== NICHE ANALYZER =====
 function analyzeNiche() {
   const name = document.getElementById('n-name').value.trim();
   const keyword = document.getElementById('n-keyword').value.trim();
@@ -520,29 +917,23 @@ function analyzeNiche() {
   const sellers = +document.getElementById('n-sellers').value || 1;
   const weight = +document.getElementById('n-weight').value || 100;
   const season = +document.getElementById('n-season').value || 1;
-  if (!name || !price || !cost) { alert('Remplis au moins nom, prix et coût'); return; }
-
-  // Scoring (0-100)
+  if (!name || !price || !cost) { toast('Remplis nom, prix et coût', 'error'); return; }
   const marginPct = ((price - cost - price * 0.075 - 30000) / price) * 100;
-  const marginScore = Math.min(100, Math.max(0, marginPct * 2)); // 50% margin = 100 score
+  const marginScore = Math.min(100, Math.max(0, marginPct * 2));
   const demandScore = Math.min(100, Math.log10(reviews + 1) * 30);
   const compScore = Math.max(0, 100 - sellers * 1.5);
   const weightScore = weight < 200 ? 100 : weight < 500 ? 70 : weight < 1000 ? 40 : 20;
   const finalScore = (marginScore * 0.35 + demandScore * 0.25 + compScore * 0.2 + weightScore * 0.1 + season * 10) * 1;
-
-  const verdict = finalScore > 75 ? { txt: 'Excellente niche', cls: 'green' } :
-                  finalScore > 55 ? { txt: 'Niche correcte', cls: 'orange' } :
-                  { txt: 'Niche risquée', cls: 'red' };
-
+  const verdict = finalScore > 75 ? { txt: 'Excellente niche', cls: 'green' } : finalScore > 55 ? { txt: 'Niche correcte', cls: 'orange' } : { txt: 'Niche risquée', cls: 'red' };
   const roi = ((price - cost - price * 0.075 - 30000) / cost) * 100;
-
+  const escData = JSON.stringify({name, keyword, price, cost, reviews, sellers, weight, score: Math.round(finalScore), verdict: verdict.txt}).replace(/'/g,"&apos;");
   document.getElementById('niche-result').innerHTML = `
     <div class="calc-result">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h3 style="font-size:22px">${name}</h3>
-        <span class="badge ${verdict.cls}" style="font-size:14px;padding:6px 14px">${verdict.txt} — ${finalScore.toFixed(0)}/100</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <h3>${name}</h3>
+        <span class="badge ${verdict.cls}" style="font-size:13px;padding:6px 14px">${verdict.txt} — ${finalScore.toFixed(0)}/100</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px">
         ${scoreBlock('Marge', marginScore, marginPct.toFixed(1)+'%')}
         ${scoreBlock('Demande', demandScore, reviews+' avis')}
         ${scoreBlock('Concurrence', compScore, sellers+' vendeurs')}
@@ -550,23 +941,22 @@ function analyzeNiche() {
       </div>
       <div class="calc-row"><span>Coût 1688</span><span>${fmt(cost)}</span></div>
       <div class="calc-row"><span>Prix vente</span><span>${fmt(price)}</span></div>
-      <div class="calc-row"><span>Marge nette par unité</span><span style="color:var(--green)">${fmt(price - cost - price*0.075 - 30000)}</span></div>
+      <div class="calc-row"><span>Marge nette / unité</span><span style="color:var(--green)">${fmt(price - cost - price*0.075 - 30000)}</span></div>
       <div class="calc-row"><span>ROI</span><span style="color:var(--green)">${roi.toFixed(0)}%</span></div>
       <div class="calc-row highlight">💡 À 5 ventes/jour = ${fmt((price - cost - price*0.075 - 30000) * 5 * 30)}/mois</div>
-      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-        <a class="mp-link shopee" href="https://shopee.vn/search?keyword=${encodeURIComponent(keyword)}" target="_blank">Vérifier sur Shopee</a>
-        <a class="mp-link" href="https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(keyword)}" target="_blank" style="background:rgba(255,106,0,.15);color:#ff6a00">Chercher sur 1688</a>
-        <button class="btn btn-success btn-sm" onclick='saveNiche(${JSON.stringify({name, keyword, price, cost, reviews, sellers, weight, score: Math.round(finalScore), verdict: verdict.txt}).replace(/'/g,"&apos;")})'>Sauvegarder</button>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn btn-sm" href="https://shopee.vn/search?keyword=${encodeURIComponent(keyword)}" target="_blank" style="background:#ee4d2d">Shopee VN</a>
+        <a class="btn btn-sm" href="https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(keyword)}" target="_blank" style="background:#ff6b00">1688</a>
+        <button class="btn btn-sm btn-success" onclick='saveNiche(${escData})'>💾 Sauvegarder</button>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 function scoreBlock(label, score, detail) {
   const color = score > 70 ? 'var(--green)' : score > 40 ? 'var(--orange)' : 'var(--red)';
-  return `<div style="background:var(--surface);padding:12px;border-radius:8px">
-    <div style="font-size:11px;color:var(--text2);text-transform:uppercase">${label}</div>
-    <div style="font-size:20px;font-weight:700;color:${color};margin-top:4px">${Math.round(score)}</div>
-    <div style="font-size:12px;color:var(--text2)">${detail}</div>
+  return `<div style="background:var(--surface);padding:10px;border-radius:8px">
+    <div style="font-size:10px;color:var(--text2);text-transform:uppercase">${label}</div>
+    <div style="font-size:20px;font-weight:700;color:${color};margin-top:2px">${Math.round(score)}</div>
+    <div style="font-size:11px;color:var(--text2)">${detail}</div>
     <div class="score-bar"><div class="score-fill" style="width:${score}%;background:${color}"></div></div>
   </div>`;
 }
@@ -574,34 +964,32 @@ function saveNiche(data) {
   const niches = load(KEYS.niches);
   niches.push({ id: Date.now(), ...data, date: new Date().toLocaleDateString('fr') });
   save(KEYS.niches, niches);
-  refreshNiches();
-  refreshDash();
-  alert('Niche sauvegardée !');
+  refreshNiches(); refreshDash();
+  toast('✅ Niche "' + data.name + '" sauvegardée');
 }
 function deleteNiche(id) {
   save(KEYS.niches, load(KEYS.niches).filter(n => n.id !== id));
-  refreshNiches();
+  refreshNiches(); toast('Niche supprimée', 'warning');
 }
 function refreshNiches() {
   const list = load(KEYS.niches);
   const c = document.getElementById('niches-list');
   if (!list.length) { c.innerHTML = '<div class="empty-state"><h3>Aucune niche</h3><p>Analyse ta première niche ci-dessus.</p></div>'; return; }
-  c.innerHTML = '<table><thead><tr><th>Niche</th><th>Keyword</th><th>Marché</th><th>Score</th><th>Verdict</th><th></th></tr></thead><tbody>' +
+  c.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Niche</th><th>Keyword</th><th>Marché</th><th>Score</th><th>Verdict</th><th></th></tr></thead><tbody>' +
     list.sort((a,b) => b.score - a.score).map(n =>
-      `<tr><td>${n.name}</td><td><code style="color:var(--accent2)">${n.keyword}</code></td><td>${fmt(n.cost)} → ${fmt(n.price)}</td><td><b>${n.score}/100</b></td><td><span class="badge ${n.score>75?'green':n.score>55?'orange':'red'}">${n.verdict}</span></td><td><button class="delete-btn" onclick="deleteNiche(${n.id})">✕</button></td></tr>`
-    ).join('') + '</tbody></table>';
+      `<tr><td><b>${n.name}</b></td><td><code style="color:var(--accent2);font-size:12px">${n.keyword}</code></td><td style="white-space:nowrap">${fmt(n.cost)} → ${fmt(n.price)}</td><td><b>${n.score}/100</b></td><td><span class="badge ${n.score>75?'green':n.score>55?'orange':'red'}">${n.verdict}</span></td><td><button class="delete-btn" onclick="deleteNiche(${n.id})">✕</button></td></tr>`
+    ).join('') + '</tbody></table></div>';
 }
 
-// === LISTING GENERATOR ===
+// ===== LISTING GENERATOR =====
 const listingTemplates = {
-  electronics: { emojis: '🎧⚡🔥', keywords: 'chính hãng, cao cấp, bảo hành, công nghệ mới' },
-  fashion: { emojis: '👗✨💫', keywords: 'thời trang, sang trọng, chất liệu cao cấp, hot trend' },
-  home: { emojis: '🏠💡🎨', keywords: 'tiện dụng, sang trọng, trang trí, đa năng' },
-  beauty: { emojis: '💄✨💖', keywords: 'an toàn, chính hãng, dưỡng da, hiệu quả' },
-  kids: { emojis: '🧸🎈🎁', keywords: 'an toàn cho bé, chất liệu nhập khẩu, phát triển trí tuệ' },
-  phone: { emojis: '📱⚡🔥', keywords: 'chính hãng, chất lượng, tương thích nhiều dòng' }
+  electronics: { emojis:'🎧⚡🔥', keywords:'chính hãng, cao cấp, bảo hành, công nghệ mới' },
+  fashion: { emojis:'👗✨💫', keywords:'thời trang, sang trọng, chất liệu cao cấp, hot trend' },
+  home: { emojis:'🏠💡🎨', keywords:'tiện dụng, sang trọng, trang trí, đa năng' },
+  beauty: { emojis:'💄✨💖', keywords:'an toàn, chính hãng, dưỡng da, hiệu quả' },
+  kids: { emojis:'🧸🎈🎁', keywords:'an toàn cho bé, chất liệu nhập khẩu, phát triển trí tuệ' },
+  phone: { emojis:'📱⚡🔥', keywords:'chính hãng, chất lượng, tương thích nhiều dòng' }
 };
-
 function generateListing() {
   const type = document.getElementById('l-type').value;
   const brand = document.getElementById('l-brand').value.trim() || 'No brand';
@@ -609,120 +997,75 @@ function generateListing() {
   const price = +document.getElementById('l-price').value || 0;
   const features = document.getElementById('l-features').value.split(',').map(f => f.trim()).filter(Boolean);
   const variants = document.getElementById('l-variants').value.split(',').map(v => v.trim()).filter(Boolean);
-  if (!name || !features.length) { alert('Remplis au moins le nom et les caractéristiques'); return; }
-
+  if (!name || !features.length) { toast('Remplis au moins le nom et les caractéristiques', 'error'); return; }
   const tpl = listingTemplates[type];
   const title = `${tpl.emojis[0]} ${name} ${features.slice(0,3).join(' - ')} | ${tpl.keywords.split(',')[0]} ${tpl.emojis[1]}`.substring(0, 120);
-
-  const description = `${tpl.emojis} ${name.toUpperCase()} ${tpl.emojis}
-
-✨ MÔ TẢ SẢN PHẨM ✨
-${name} - ${tpl.keywords}. Sản phẩm chất lượng cao với thiết kế tinh tế, phù hợp cho mọi đối tượng.
-
-🔥 ĐẶC ĐIỂM NỔI BẬT 🔥
-${features.map(f => '✅ ' + f.charAt(0).toUpperCase() + f.slice(1)).join('\n')}
-
-📦 THÔNG TIN SẢN PHẨM 📦
-• Thương hiệu: ${brand}
-• Giá: ${fmt(price)}
-${variants.length ? '• Màu sắc/Phiên bản: ' + variants.join(', ') : ''}
-
-🚚 CHÍNH SÁCH GIAO HÀNG 🚚
-✓ Giao hàng toàn quốc 3-7 ngày
-✓ Đóng gói cẩn thận, chống va đập
-✓ Kiểm tra hàng trước khi thanh toán (COD)
-
-💯 CAM KẾT CỦA SHOP 💯
-✓ Sản phẩm 100% như hình
-✓ Bảo hành đổi trả trong 7 ngày
-✓ Hỗ trợ tư vấn 24/7
-
-#${name.replace(/ /g,'')} #${tpl.keywords.split(',')[0].replace(/ /g,'')} #shopeevietnam`;
-
+  const description = `${tpl.emojis} ${name.toUpperCase()} ${tpl.emojis}\n\n✨ MÔ TẢ SẢN PHẨM ✨\n${name} - ${tpl.keywords}. Sản phẩm chất lượng cao với thiết kế tinh tế.\n\n🔥 ĐẶC ĐIỂM NỔI BẬT 🔥\n${features.map(f => '✅ ' + f.charAt(0).toUpperCase() + f.slice(1)).join('\n')}\n\n📦 THÔNG TIN SẢN PHẨM 📦\n• Thương hiệu: ${brand}\n• Giá: ${fmt(price)}\n${variants.length ? '• Màu sắc/Phiên bản: ' + variants.join(', ') : ''}\n\n🚚 CHÍNH SÁCH GIAO HÀNG 🚚\n✓ Giao hàng toàn quốc 3-7 ngày\n✓ Đóng gói cẩn thận, chống va đập\n✓ Kiểm tra hàng trước khi thanh toán (COD)\n\n💯 CAM KẾT CỦA SHOP 💯\n✓ Sản phẩm 100% như hình\n✓ Bảo hành đổi trả trong 7 ngày\n✓ Hỗ trợ tư vấn 24/7\n\n#${name.replace(/ /g,'')} #${tpl.keywords.split(',')[0].replace(/ /g,'')} #shopeevietnam`;
   const bullets = features.map(f => '✅ ' + f.charAt(0).toUpperCase() + f.slice(1)).join('\n');
-
   const tags = [...name.toLowerCase().split(' '), ...tpl.keywords.split(',').map(k=>k.trim()), ...features.map(f=>f.split(' ')[0])].filter(t=>t.length>2).slice(0,15);
-
   document.getElementById('listing-result').innerHTML = `
-    <div style="margin-top:20px">
-      <h4 style="margin-bottom:8px;font-size:13px;color:var(--text2);text-transform:uppercase">Titre (${title.length}/120 car.)</h4>
-      <div class="output-box">${title}<button class="copy-btn" onclick="copyToClipboard(this, \`${title.replace(/`/g,'\\\`')}\`)">Copier</button></div>
-      <h4 style="margin:20px 0 8px;font-size:13px;color:var(--text2);text-transform:uppercase">Description complète</h4>
-      <div class="output-box">${description}<button class="copy-btn" onclick="copyToClipboard(this, \`${description.replace(/`/g,'\\\`')}\`)">Copier</button></div>
-      <h4 style="margin:20px 0 8px;font-size:13px;color:var(--text2);text-transform:uppercase">Bullet points courts</h4>
-      <div class="output-box">${bullets}<button class="copy-btn" onclick="copyToClipboard(this, \`${bullets.replace(/`/g,'\\\`')}\`)">Copier</button></div>
-      <h4 style="margin:20px 0 8px;font-size:13px;color:var(--text2);text-transform:uppercase">Tags SEO</h4>
-      <div class="tag-list">${tags.map(t => '<span class="tag">' + t + '</span>').join('')}</div>
-      <button class="copy-btn" style="position:relative;margin-top:8px" onclick="copyToClipboard(this, \`${tags.join(', ')}\`)">Copier tous les tags</button>
-    </div>
-  `;
+    <div style="margin-top:18px">
+      <h4 style="margin-bottom:6px;font-size:12px;color:var(--text2);text-transform:uppercase">Titre (${title.length}/120)</h4>
+      <div class="output-box">${title}<button class="copy-btn" onclick="copyToClipboard(this,\`${title.replace(/`/g,'\\`')}\`)">Copier</button></div>
+      <h4 style="margin:16px 0 6px;font-size:12px;color:var(--text2);text-transform:uppercase">Description</h4>
+      <div class="output-box">${description}<button class="copy-btn" onclick="copyToClipboard(this,\`${description.replace(/`/g,'\\`')}\`)">Copier</button></div>
+      <h4 style="margin:16px 0 6px;font-size:12px;color:var(--text2);text-transform:uppercase">Bullet points</h4>
+      <div class="output-box">${bullets}<button class="copy-btn" onclick="copyToClipboard(this,\`${bullets.replace(/`/g,'\\`')}\`)">Copier</button></div>
+      <h4 style="margin:16px 0 6px;font-size:12px;color:var(--text2);text-transform:uppercase">Tags SEO</h4>
+      <div class="tag-list">${tags.map(t => '<span class="tag">'+t+'</span>').join('')}</div>
+      <button class="copy-btn" style="position:relative;margin-top:8px" onclick="copyToClipboard(this,\`${tags.join(', ')}\`)">Copier tags</button>
+    </div>`;
   const listings = load(KEYS.listings);
   listings.push({ id: Date.now(), name, type, date: new Date().toLocaleDateString('fr') });
   save(KEYS.listings, listings);
   refreshDash();
 }
-
 function copyToClipboard(btn, text) {
   navigator.clipboard.writeText(text).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copié';
+    const orig = btn.textContent; btn.textContent = '✓ Copié';
     setTimeout(() => btn.textContent = orig, 1500);
   });
 }
 
-// === PRICE MONITORING ===
+// ===== PRICE MONITORING =====
 function addMonitor() {
   const product = document.getElementById('m-product').value.trim();
   const competitor = document.getElementById('m-competitor').value.trim();
   const price = +document.getElementById('m-price').value;
   const platform = document.getElementById('m-platform').value;
   const url = document.getElementById('m-url').value.trim();
-  if (!product || !competitor || !price) { alert('Remplis produit, concurrent et prix'); return; }
+  if (!product || !competitor || !price) { toast('Remplis produit, concurrent et prix', 'error'); return; }
   const monitors = load(KEYS.monitors);
   monitors.push({ id: Date.now(), product, competitor, price, platform, url, date: new Date().toISOString() });
   save(KEYS.monitors, monitors);
   document.getElementById('m-price').value = '';
-  refreshMonitors();
-  refreshDash();
+  refreshMonitors(); refreshDash();
+  toast('✅ Relevé ajouté pour ' + product);
 }
 function deleteMonitor(id) {
   save(KEYS.monitors, load(KEYS.monitors).filter(m => m.id !== id));
-  refreshMonitors();
+  refreshMonitors(); toast('Relevé supprimé', 'warning');
 }
 function refreshMonitors() {
   const all = load(KEYS.monitors);
   const c = document.getElementById('monitor-list');
   if (!all.length) { c.innerHTML = '<div class="empty-state"><h3>Aucun relevé</h3><p>Ajoute ton premier relevé ci-dessus.</p></div>'; return; }
-  // Group by product+competitor
   const groups = {};
-  all.forEach(m => {
-    const key = m.product + '|' + m.competitor + '|' + m.platform;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(m);
-  });
-  let html = '<table><thead><tr><th>Produit</th><th>Concurrent</th><th>Plateforme</th><th>Prix actuel</th><th>Variation</th><th>Relevés</th><th>Dernier</th><th></th></tr></thead><tbody>';
+  all.forEach(m => { const key = m.product+'|'+m.competitor+'|'+m.platform; if (!groups[key]) groups[key]=[]; groups[key].push(m); });
+  let html = '<table><thead><tr><th>Produit</th><th>Concurrent</th><th>Plateforme</th><th>Prix</th><th>Variation</th><th>Relevés</th><th></th></tr></thead><tbody>';
   Object.values(groups).forEach(g => {
     g.sort((a,b) => new Date(b.date) - new Date(a.date));
     const latest = g[0], oldest = g[g.length-1];
     const variation = g.length > 1 ? ((latest.price - oldest.price) / oldest.price * 100) : 0;
     const varCls = variation > 0 ? 'red' : variation < 0 ? 'green' : 'orange';
     const arrow = variation > 0 ? '↑' : variation < 0 ? '↓' : '→';
-    html += `<tr>
-      <td>${latest.url ? `<a href="${latest.url}" target="_blank" style="color:var(--accent2)">${latest.product}</a>` : latest.product}</td>
-      <td>${latest.competitor}</td>
-      <td>${latest.platform}</td>
-      <td><b>${fmt(latest.price)}</b></td>
-      <td><span class="badge ${varCls}">${arrow} ${Math.abs(variation).toFixed(1)}%</span></td>
-      <td>${g.length}</td>
-      <td style="color:var(--text2);font-size:12px">${new Date(latest.date).toLocaleDateString('fr')}</td>
-      <td><button class="delete-btn" onclick="deleteMonitor(${latest.id})">✕</button></td>
-    </tr>`;
+    html += `<tr><td>${latest.url ? `<a href="${latest.url}" target="_blank" style="color:var(--accent2)">${latest.product}</a>` : latest.product}</td><td>${latest.competitor}</td><td>${latest.platform}</td><td><b>${fmt(latest.price)}</b></td><td><span class="badge ${varCls}">${arrow} ${Math.abs(variation).toFixed(1)}%</span></td><td>${g.length}</td><td><button class="delete-btn" onclick="deleteMonitor(${latest.id})">✕</button></td></tr>`;
   });
   html += '</tbody></table>';
   c.innerHTML = html;
 }
 
-// === 1688 CALCULATOR ===
+// ===== 1688 CALCULATOR v2 (frais réels VN) =====
 function calc1688() {
   const yuan = +document.getElementById('c-yuan').value || 0;
   const rate = +document.getElementById('c-rate').value || 3500;
@@ -732,129 +1075,128 @@ function calc1688() {
   const weight = +document.getElementById('c-weight').value || 100;
   const agent = +document.getElementById('c-agent').value || 0;
   const customs = +document.getElementById('c-customs').value || 0;
+  const vat = +document.getElementById('c-vat').value || 0;
+  const consol = +document.getElementById('c-consol').value || 0;
+  const retRate = +document.getElementById('c-returns').value || 0;
   const vnShip = +document.getElementById('c-vn-ship').value || 0;
+  const shopeePct = +document.getElementById('c-shopee').value || 7.5;
   const sell = +document.getElementById('c-sell').value || 0;
   if (!yuan) { document.getElementById('calc1688-result').innerHTML = '<p style="color:var(--text2)">Entre au moins le prix en ¥.</p>'; return; }
 
+  // ===== COÛTS D'IMPORT =====
   const productVND = yuan * rate * qty;
   const cnShipVND = cnShip * rate * qty;
   const intlShipVND = (weight * qty / 1000) * intlShip;
   const subtotal = productVND + cnShipVND + intlShipVND;
   const agentFee = subtotal * (agent / 100);
-  const customsFee = subtotal * (customs / 100);
-  const totalImport = subtotal + agentFee + customsFee;
+  const cifBase = subtotal + agentFee;              // base CIF pour douane/TVA
+  const customsFee = cifBase * (customs / 100);
+  const vatFee = (cifBase + customsFee) * (vat / 100); // TVA sur CIF + douane
+  const totalImport = cifBase + customsFee + vatFee + consol;
   const totalImportPerUnit = totalImport / qty;
-  const finalCost = totalImportPerUnit + vnShip;
-  const shopeeFee = sell * 0.075;
-  const profit = sell - finalCost - shopeeFee;
-  const margin = sell ? (profit / sell * 100) : 0;
-  const roi = finalCost ? (profit / finalCost * 100) : 0;
+  const landedCost = totalImportPerUnit + vnShip;   // coût livré chez le client, hors buffer
+
+  // Buffer retours : chaque vente porte (retRate%) de coût perdu (produit non retourné, ou réexpédié)
+  const returnsBuffer = landedCost * (retRate / 100);
+  const finalCost = landedCost + returnsBuffer;
+
+  // ===== RENTABILITÉ =====
+  const computeProfit = (s) => {
+    const fee = s * (shopeePct / 100);
+    const p = s - finalCost - fee;
+    return { sell: s, fee, profit: p, margin: s ? p/s*100 : 0, roi: finalCost ? p/finalCost*100 : 0 };
+  };
+  const cur = computeProfit(sell);
+
+  // Break-even : prix de vente pour profit=0 → finalCost / (1 - shopeePct/100)
+  const breakeven = finalCost / (1 - shopeePct/100);
+  // Prix pour marge 40%
+  const priceFor40 = finalCost / (1 - 0.40 - shopeePct/100);
+  const priceFor30 = finalCost / (1 - 0.30 - shopeePct/100);
+
+  // Table scénarios ±20%
+  const scenarios = sell ? [0.8, 0.9, 1.0, 1.1, 1.2].map(m => computeProfit(Math.round(sell * m))) : [];
+
+  const bd = (label, val, cls='') => `<div class="calc-row ${cls}"><span>${label}</span><span>${fmt(val)}</span></div>`;
+  const color = v => v > 0 ? 'var(--green)' : 'var(--red)';
 
   document.getElementById('calc1688-result').innerHTML = `
-    <div style="margin-bottom:16px;font-weight:600;color:var(--accent2)">COÛTS D'IMPORT (x${qty} unités)</div>
-    <div class="calc-row"><span>Produit (${yuan}¥ × ${rate} × ${qty})</span><span>${fmt(productVND)}</span></div>
-    <div class="calc-row"><span>Shipping interne CN</span><span>${fmt(cnShipVND)}</span></div>
-    <div class="calc-row"><span>Shipping CN→VN (${weight*qty}g)</span><span>${fmt(intlShipVND)}</span></div>
-    <div class="calc-row"><span>Commission agent (${agent}%)</span><span>${fmt(agentFee)}</span></div>
-    <div class="calc-row"><span>Douane (${customs}%)</span><span>${fmt(customsFee)}</span></div>
-    <div class="calc-row" style="font-weight:700"><span>TOTAL IMPORT</span><span>${fmt(totalImport)}</span></div>
-    <div style="margin:20px 0 8px;font-weight:600;color:var(--accent2)">PAR UNITÉ</div>
-    <div class="calc-row"><span>Coût import / unité</span><span>${fmt(totalImportPerUnit)}</span></div>
-    <div class="calc-row"><span>Livraison VN → client</span><span>${fmt(vnShip)}</span></div>
-    <div class="calc-row highlight">💰 COÛT DE REVIENT TOTAL : ${fmt(finalCost)}</div>
+    <div style="margin-bottom:14px;font-weight:600;color:var(--accent2)">📦 COÛTS D'IMPORT (×${qty} unités)</div>
+    ${bd(`Produit (${yuan}¥ × ${rate} × ${qty})`, productVND)}
+    ${bd(`Shipping interne CN`, cnShipVND)}
+    ${bd(`Shipping CN→VN (${weight*qty}g)`, intlShipVND)}
+    ${bd(`Commission agent (${agent}%)`, agentFee)}
+    <div style="margin-top:8px;padding:6px 0;color:var(--text2);font-size:12px;border-top:1px dashed var(--border)">Taxes & frais fixes</div>
+    ${bd(`Douane (${customs}%)`, customsFee)}
+    ${bd(`TVA VN (${vat}%)`, vatFee)}
+    ${bd(`Consolidation (forfait)`, consol)}
+    <div class="calc-row" style="font-weight:700;border-top:1px solid var(--accent);padding-top:10px"><span>TOTAL IMPORT</span><span>${fmt(totalImport)}</span></div>
+
+    <div style="margin:16px 0 8px;font-weight:600;color:var(--accent2)">🎯 PAR UNITÉ</div>
+    ${bd(`Coût import / unité`, totalImportPerUnit)}
+    ${bd(`Livraison VN → client`, vnShip)}
+    ${bd(`Buffer retours (${retRate}% × landed)`, returnsBuffer)}
+    <div class="calc-row highlight">💰 COÛT DE REVIENT RÉEL : ${fmt(finalCost)}</div>
+
+    <div style="margin:16px 0 8px;font-weight:600;color:var(--accent2)">📊 SEUILS DE RENTABILITÉ</div>
+    ${bd(`Break-even (profit = 0)`, Math.round(breakeven))}
+    ${bd(`Pour marge 30%`, Math.round(priceFor30))}
+    ${bd(`Pour marge 40%`, Math.round(priceFor40))}
+
     ${sell ? `
-      <div style="margin:20px 0 8px;font-weight:600;color:var(--accent2)">RENTABILITÉ</div>
-      <div class="calc-row"><span>Prix de vente</span><span>${fmt(sell)}</span></div>
-      <div class="calc-row"><span>Frais Shopee (7.5%)</span><span>-${fmt(shopeeFee)}</span></div>
-      <div class="calc-row"><span>Coût de revient</span><span>-${fmt(finalCost)}</span></div>
-      <div class="calc-row" style="color:${profit>0?'var(--green)':'var(--red)'};font-size:18px"><span>Profit net par unité</span><span>${profit>0?'+':''}${fmt(profit)}</span></div>
-      <div class="calc-row"><span>Marge</span><span style="color:${margin>0?'var(--green)':'var(--red)'}">${margin.toFixed(1)}%</span></div>
-      <div class="calc-row"><span>ROI</span><span style="color:${roi>0?'var(--green)':'var(--red)'}">${roi.toFixed(1)}%</span></div>
-      <div class="calc-row highlight">📈 À 5 ventes/jour : ${fmt(profit * 5 * 30)} / mois</div>
-    ` : '<p style="color:var(--text2);margin-top:16px">💡 Ajoute un prix de vente pour voir la rentabilité.</p>'}
-  `;
+      <div style="margin:16px 0 8px;font-weight:600;color:var(--accent2)">💵 RENTABILITÉ AU PRIX SAISI</div>
+      ${bd(`Prix vente`, sell)}
+      ${bd(`Frais Shopee (${shopeePct}%)`, -cur.fee)}
+      ${bd(`Coût de revient`, -finalCost)}
+      <div class="calc-row" style="color:${color(cur.profit)};font-size:17px"><span>Profit net / unité</span><span>${cur.profit>0?'+':''}${fmt(cur.profit)}</span></div>
+      <div class="calc-row"><span>Marge</span><span style="color:${color(cur.margin)}">${cur.margin.toFixed(1)}%</span></div>
+      <div class="calc-row"><span>ROI sur coût</span><span style="color:${color(cur.roi)}">${cur.roi.toFixed(1)}%</span></div>
+      <div class="calc-row highlight">📈 À 5 ventes/jour : ${fmt(cur.profit * 5 * 30)} / mois</div>
+
+      <div style="margin:18px 0 8px;font-weight:600;color:var(--accent2)">🔢 TABLE DE SCÉNARIOS (±20%)</div>
+      <div style="overflow-x:auto"><table style="font-size:13px;min-width:360px">
+        <thead><tr><th>Prix</th><th>Δ%</th><th>Profit/u</th><th>Marge</th><th>Profit/mois (5/j)</th></tr></thead>
+        <tbody>
+          ${scenarios.map((s,i) => {
+            const lbls = ['-20%','-10%','actuel','+10%','+20%'];
+            const isCur = i === 2;
+            return `<tr style="${isCur?'background:rgba(108,92,231,0.08);font-weight:600':''}"><td>${fmt(s.sell)}</td><td>${lbls[i]}</td><td style="color:${color(s.profit)}">${s.profit>0?'+':''}${fmt(s.profit)}</td><td style="color:${color(s.margin)}">${s.margin.toFixed(1)}%</td><td>${fmt(Math.round(s.profit*5*30))}</td></tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>
+    ` : '<p style="color:var(--text2);margin-top:14px">💡 Ajoute un prix de vente pour voir la rentabilité et les scénarios.</p>'}`;
 }
 
-// === CUSTOMER REPLIES ===
+// ===== CUSTOMER REPLIES =====
 const replyTemplates = {
-  welcome: {
-    polite: "Xin chào bạn! Cảm ơn bạn đã quan tâm đến sản phẩm {product} của shop. Bạn có câu hỏi gì về sản phẩm không ạ? Shop sẵn sàng tư vấn 24/7. 😊",
-    friendly: "Chào bạn yêu ơi! 💕 Cảm ơn bạn đã ghé shop nha! Sản phẩm {product} đang có giá ưu đãi đó, bạn cần shop tư vấn gì không? 🥰",
-    formal: "Kính chào Quý khách, Shop xin cảm ơn Quý khách đã quan tâm đến sản phẩm {product}. Chúng tôi sẵn sàng hỗ trợ mọi thông tin Quý khách cần."
-  },
-  shipping: {
-    polite: "Chào bạn! Thời gian giao hàng trung bình là {days} ngày làm việc (tùy khu vực). Shop sẽ xử lý đơn ngay sau khi bạn đặt hàng. Bạn có thể yên tâm đặt nha! 🚚",
-    friendly: "Bạn ơi, đơn của mình sẽ đến tay bạn trong khoảng {days} ngày làm việc nhé! 🚚 Shop ship siêu nhanh luôn, bạn đừng lo 💕",
-    formal: "Kính chào Quý khách, thời gian giao hàng dự kiến {days} ngày làm việc kể từ khi đơn hàng được xác nhận. Quý khách vui lòng theo dõi đơn hàng qua Shopee."
-  },
-  stock: {
-    polite: "Dạ sản phẩm còn hàng nhé bạn! Bạn có thể đặt ngay để shop xử lý sớm nhất. Cảm ơn bạn! 🛒",
-    friendly: "Còn hàng nha bạn ơi! 🛍️ Mua ngay kẻo hết nhé, shop đóng gói cẩn thận chuyển đi ngay luôn 💕",
-    formal: "Kính thông báo: Sản phẩm hiện đang có sẵn tại kho. Quý khách vui lòng đặt hàng để được xử lý sớm nhất."
-  },
-  variants: {
-    polite: "Chào bạn, sản phẩm {product} hiện có các màu/phiên bản sau. Bạn vui lòng chọn ở phần Phân Loại trước khi Đặt Hàng nhé! 🎨",
-    friendly: "Bạn ơi, {product} có nhiều phiên bản lắm nha! 🌈 Bạn lướt phần Phân loại trên sản phẩm để chọn nhé, shop ship cho bạn liền 💕",
-    formal: "Kính chào Quý khách, sản phẩm {product} có nhiều tùy chọn khác nhau. Quý khách vui lòng chọn phân loại phù hợp trước khi đặt hàng."
-  },
-  size: {
-    polite: "Chào bạn! Bạn cho shop biết số đo (cao/cân nặng/vòng) hoặc size bạn thường mặc, shop sẽ tư vấn size phù hợp nhất ạ. 📏",
-    friendly: "Bạn ơi cho mình biết chiều cao + cân nặng của bạn đi, mình tư vấn size chuẩn luôn cho bạn yêu 💕📏",
-    formal: "Để tư vấn size chính xác, Quý khách vui lòng cung cấp chiều cao và cân nặng. Shop sẽ tư vấn size phù hợp nhất."
-  },
-  return: {
-    polite: "Dạ shop có chính sách đổi trả trong 7 ngày với điều kiện sản phẩm còn nguyên tem, chưa qua sử dụng. Bạn liên hệ shop qua Shopee Chat khi cần đổi trả nhé! 🔄",
-    friendly: "Yên tâm nha bạn! 💕 Shop cho đổi trả trong 7 ngày nếu sản phẩm còn mới nguyên. Có gì bạn nhắn lại shop giúp bạn liền 🥰",
-    formal: "Chính sách đổi trả: 7 ngày kể từ khi nhận hàng, sản phẩm còn nguyên tem mác và chưa qua sử dụng. Vui lòng liên hệ Shop để được hỗ trợ."
-  },
-  defect: {
-    polite: "Shop xin thành thật xin lỗi bạn về sự cố này 🙏. Bạn có thể gửi giúp shop hình/video sản phẩm bị lỗi qua chat, shop sẽ hỗ trợ đổi/hoàn tiền ngay. Cảm ơn bạn!",
-    friendly: "Ôi shop xin lỗi bạn nhiều lắm 😢 Bạn gửi ảnh/video hàng lỗi qua chat cho shop xem với nha, shop sẽ xử lý đổi trả hoặc hoàn tiền ngay liền luôn 💕",
-    formal: "Shop xin thành thật xin lỗi về sự cố không mong muốn. Quý khách vui lòng gửi hình ảnh/video chứng minh sản phẩm lỗi qua Shopee Chat để Shop xử lý đổi trả/hoàn tiền trong thời gian sớm nhất."
-  },
-  discount: {
-    polite: "Chào bạn! Shop có chương trình giảm giá cho khách mua nhiều. Bạn mua từ 2 sản phẩm trở lên shop tặng voucher/freeship nhé! Cảm ơn bạn 💰",
-    friendly: "Bạn ơi shop yêu bạn lắm rồi mà giá đã ưu đãi nhất luôn á 🥺 Mua 2 cái shop tặng freeship hoặc voucher nha bạn yêu! 💕",
-    formal: "Kính chào Quý khách, Shop áp dụng ưu đãi khi mua số lượng: Từ 2 sản phẩm trở lên được tặng voucher/miễn phí vận chuyển."
-  },
-  thanks: {
-    polite: "Cảm ơn bạn đã đặt hàng tại shop! 💕 Đơn của bạn đang được đóng gói và sẽ được giao trong {days} ngày. Nếu bạn hài lòng, xin vui lòng đánh giá 5⭐ giúp shop nhé! 🙏",
-    friendly: "Yêu bạn nhiều lắm! 💕 Shop đang đóng gói đơn cho bạn cẩn thận nè, {days} ngày nữa bạn nhận hàng nha! Nhớ đánh giá 5⭐ cho shop nha bạn yêu 🥰",
-    formal: "Shop chân thành cảm ơn Quý khách đã tin tưởng đặt hàng. Đơn hàng sẽ được giao trong vòng {days} ngày. Mong Quý khách đánh giá 5 sao để ủng hộ Shop."
-  },
-  review: {
-    polite: "Chào bạn! Bạn đã nhận được hàng chưa ạ? Nếu hài lòng bạn vui lòng đánh giá 5⭐ kèm hình để được tặng voucher 10K cho lần mua sau nhé! Cảm ơn bạn 🎁",
-    friendly: "Bạn yêu ơi! 💕 Đơn hàng vừa rồi ok không bạn? Nếu ưng thì đánh giá 5⭐ kèm ảnh để shop tặng voucher 10K cho lần sau nha! Yêu bạn 🥰🎁",
-    formal: "Shop kính mong Quý khách đánh giá 5 sao kèm hình ảnh thực tế. Shop sẽ gửi tặng voucher 10.000đ cho đơn hàng tiếp theo như lời cảm ơn."
-  },
-  delay: {
-    polite: "Shop xin lỗi bạn về sự chậm trễ này 🙏. Đơn vị vận chuyển đang gặp một chút vấn đề. Shop sẽ theo dõi sát đơn và cập nhật cho bạn sớm nhất. Mong bạn thông cảm!",
-    friendly: "Ôi shop xin lỗi bạn nhiều 😢 Ship đang bị trễ chút xíu, shop đã check với bên vận chuyển rồi nha. Bạn thông cảm xíu, mình cập nhật ngay khi có tin 💕",
-    formal: "Shop thành thật xin lỗi về việc giao hàng chậm trễ do phía đơn vị vận chuyển. Chúng tôi đang theo dõi sát và sẽ cập nhật trạng thái đơn hàng sớm nhất."
-  },
-  wrong: {
-    polite: "Shop thật sự xin lỗi bạn về sai sót này 🙏. Bạn vui lòng gửi ảnh sản phẩm nhận được qua chat. Shop sẽ gửi đúng hàng ngay + hoàn tiền ship/tặng voucher cho bạn. Cảm ơn bạn đã thông cảm!",
-    friendly: "Trời ơi shop xin lỗi bạn siêu nhiều 😭 Bạn gửi ảnh hàng cho shop xem với, shop sẽ gửi đúng đơn + tặng voucher để bù đắp cho bạn nha bạn yêu 💕",
-    formal: "Shop chân thành xin lỗi về sai sót trong quá trình đóng gói. Quý khách vui lòng gửi hình ảnh sản phẩm thực nhận qua chat. Shop sẽ gửi lại sản phẩm đúng và hoàn tiền ship/tặng voucher để bù đắp."
-  }
+  welcome: { polite:"Xin chào bạn! Cảm ơn bạn đã quan tâm đến sản phẩm {product} của shop. Bạn có câu hỏi gì về sản phẩm không ạ? Shop sẵn sàng tư vấn 24/7. 😊", friendly:"Chào bạn yêu ơi! 💕 Cảm ơn bạn đã ghé shop nha! Sản phẩm {product} đang có giá ưu đãi đó, bạn cần shop tư vấn gì không? 🥰", formal:"Kính chào Quý khách, Shop xin cảm ơn Quý khách đã quan tâm đến sản phẩm {product}. Chúng tôi sẵn sàng hỗ trợ mọi thông tin Quý khách cần." },
+  shipping: { polite:"Chào bạn! Thời gian giao hàng trung bình là {days} ngày làm việc. Shop sẽ xử lý đơn ngay sau khi bạn đặt hàng. Bạn có thể yên tâm đặt nha! 🚚", friendly:"Bạn ơi, đơn của mình sẽ đến tay bạn trong khoảng {days} ngày làm việc nhé! 🚚 Shop ship siêu nhanh luôn 💕", formal:"Kính chào Quý khách, thời gian giao hàng dự kiến {days} ngày làm việc kể từ khi đơn hàng được xác nhận." },
+  stock: { polite:"Dạ sản phẩm còn hàng nhé bạn! Bạn có thể đặt ngay để shop xử lý sớm nhất. Cảm ơn bạn! 🛒", friendly:"Còn hàng nha bạn ơi! 🛍️ Mua ngay kẻo hết nhé, shop đóng gói cẩn thận chuyển đi ngay luôn 💕", formal:"Kính thông báo: Sản phẩm hiện đang có sẵn tại kho. Quý khách vui lòng đặt hàng để được xử lý sớm nhất." },
+  variants: { polite:"Chào bạn, sản phẩm {product} hiện có các màu/phiên bản khác nhau. Bạn vui lòng chọn ở phần Phân Loại trước khi Đặt Hàng nhé! 🎨", friendly:"Bạn ơi, {product} có nhiều phiên bản lắm nha! 🌈 Bạn lướt phần Phân loại để chọn nhé, shop ship cho bạn liền 💕", formal:"Sản phẩm {product} có nhiều tùy chọn. Quý khách vui lòng chọn phân loại phù hợp trước khi đặt hàng." },
+  size: { polite:"Chào bạn! Bạn cho shop biết số đo hoặc size thường mặc, shop sẽ tư vấn size phù hợp nhất ạ. 📏", friendly:"Bạn ơi cho mình biết chiều cao + cân nặng đi, mình tư vấn size chuẩn luôn cho bạn yêu 💕📏", formal:"Để tư vấn size chính xác, Quý khách vui lòng cung cấp chiều cao và cân nặng." },
+  return: { polite:"Dạ shop có chính sách đổi trả trong 7 ngày với điều kiện sản phẩm còn nguyên tem, chưa qua sử dụng. Liên hệ shop qua Shopee Chat nhé! 🔄", friendly:"Yên tâm nha bạn! 💕 Shop cho đổi trả 7 ngày nếu còn mới nguyên. Có gì bạn nhắn lại shop giúp bạn liền 🥰", formal:"Chính sách đổi trả: 7 ngày, sản phẩm còn nguyên tem mác và chưa qua sử dụng. Vui lòng liên hệ Shop." },
+  defect: { polite:"Shop xin lỗi bạn về sự cố này 🙏. Bạn gửi hình/video sản phẩm lỗi qua chat, shop sẽ hỗ trợ đổi/hoàn tiền ngay.", friendly:"Ôi shop xin lỗi bạn nhiều lắm 😢 Gửi ảnh/video hàng lỗi qua chat nha, shop xử lý đổi trả hoặc hoàn tiền ngay luôn 💕", formal:"Shop xin thành thật xin lỗi. Quý khách vui lòng gửi hình ảnh/video sản phẩm lỗi qua Shopee Chat để Shop xử lý đổi trả/hoàn tiền." },
+  discount: { polite:"Chào bạn! Shop có ưu đãi khi mua nhiều — từ 2 sản phẩm trở lên tặng voucher/freeship nhé! 💰", friendly:"Bạn ơi shop yêu bạn rồi nên giá đã ưu đãi nhất á 🥺 Mua 2 cái shop tặng freeship hoặc voucher nha bạn yêu! 💕", formal:"Shop áp dụng ưu đãi khi mua số lượng: Từ 2 sản phẩm trở lên được tặng voucher/miễn phí vận chuyển." },
+  thanks: { polite:"Cảm ơn bạn đã đặt hàng! 💕 Đơn đang được đóng gói, giao trong {days} ngày. Nếu hài lòng, xin đánh giá 5⭐ giúp shop nhé! 🙏", friendly:"Yêu bạn nhiều lắm! 💕 Shop đang đóng gói cẩn thận, {days} ngày nữa bạn nhận hàng nha! Nhớ đánh giá 5⭐ cho shop nha 🥰", formal:"Shop chân thành cảm ơn Quý khách. Đơn hàng sẽ được giao trong vòng {days} ngày. Mong Quý khách đánh giá 5 sao." },
+  review: { polite:"Chào bạn! Bạn đã nhận được hàng chưa? Nếu hài lòng, đánh giá 5⭐ kèm hình để được tặng voucher 10K cho lần sau nhé! 🎁", friendly:"Bạn yêu ơi! 💕 Đơn hàng vừa rồi ổn không? Đánh giá 5⭐ kèm ảnh thì shop tặng voucher 10K nha! 🥰🎁", formal:"Shop kính mong Quý khách đánh giá 5 sao kèm hình ảnh thực tế. Shop sẽ gửi voucher 10.000đ cho đơn tiếp theo." },
+  delay: { polite:"Shop xin lỗi về sự chậm trễ 🙏. Đơn vị vận chuyển đang gặp vấn đề. Shop sẽ cập nhật cho bạn sớm nhất. Mong bạn thông cảm!", friendly:"Ôi shop xin lỗi bạn nhiều 😢 Ship đang bị trễ chút xíu, shop đã check rồi nha. Bạn thông cảm xíu 💕", formal:"Shop thành thật xin lỗi về việc giao hàng chậm trễ. Chúng tôi sẽ cập nhật trạng thái đơn hàng sớm nhất." },
+  wrong: { polite:"Shop thật sự xin lỗi bạn 🙏. Gửi ảnh sản phẩm nhận được qua chat. Shop sẽ gửi đúng hàng + hoàn tiền ship/tặng voucher. Cảm ơn!", friendly:"Trời ơi shop xin lỗi bạn siêu nhiều 😭 Gửi ảnh hàng cho shop xem, shop gửi đúng đơn + tặng voucher bù đắp bạn nha 💕", formal:"Shop chân thành xin lỗi về sai sót. Quý khách gửi hình ảnh thực nhận qua chat. Shop sẽ gửi lại sản phẩm đúng và hoàn tiền ship/tặng voucher." }
 };
-
 function generateReply() {
   const type = document.getElementById('r-type').value;
   const product = document.getElementById('r-product').value.trim() || 'sản phẩm';
   const days = document.getElementById('r-days').value || '12';
   const tone = document.getElementById('r-tone').value;
-  let text = replyTemplates[type][tone];
+  let text = replyTemplates[type]?.[tone] || '';
   text = text.replace(/{product}/g, product).replace(/{days}/g, days);
   document.getElementById('reply-result').innerHTML = `
-    <div style="margin-top:16px">
+    <div style="margin-top:14px">
       <div class="output-box">${text}<button class="copy-btn" onclick='copyToClipboard(this, ${JSON.stringify(text)})'>Copier</button></div>
-      <p style="color:var(--text2);font-size:12px;margin-top:8px">💡 Copie-colle dans Shopee Chat. Pour gagner du temps, ajoute ces réponses dans les "Réponses rapides" de Shopee Seller Center.</p>
-    </div>
-  `;
+      <p style="color:var(--text2);font-size:12px;margin-top:8px">💡 Ajoute ces réponses dans "Réponses rapides" du Shopee Seller Center pour gagner du temps.</p>
+    </div>`;
 }
 
-// === TRACKER ===
+// ===== TRACKER =====
 function addProduct() {
   const n = document.getElementById('track-name').value.trim();
   const b = +document.getElementById('track-buy').value;
@@ -862,59 +1204,57 @@ function addProduct() {
   const bs = document.getElementById('track-buy-src').value;
   const ss = document.getElementById('track-sell-src').value;
   const u = document.getElementById('track-url').value.trim();
-  if (!n || !b || !s) { alert('Remplis nom, coût et prix'); return; }
-  const fee = s * 0.075;
-  const profit = s - b - fee;
-  const margin = profit / s * 100;
+  if (!n || !b || !s) { toast('Remplis nom, coût et prix', 'error'); return; }
+  const fee = s * 0.075, profit = s - b - fee, margin = profit / s * 100;
   const ps = load(KEYS.products);
   ps.push({ id: Date.now(), name: n, buy: b, sell: s, buySrc: bs, sellSrc: ss, url: u, profit: Math.round(profit), margin: margin.toFixed(1), date: new Date().toLocaleDateString('fr') });
   save(KEYS.products, ps);
   ['track-name','track-buy','track-sell','track-url'].forEach(id => document.getElementById(id).value = '');
-  refreshTracker();
-  refreshDash();
+  refreshTracker(); refreshDash();
+  toast('✅ ' + n + ' ajouté au tracker');
 }
-function deleteProduct(id) { save(KEYS.products, load(KEYS.products).filter(p => p.id !== id)); refreshTracker(); }
+function deleteProduct(id) {
+  save(KEYS.products, load(KEYS.products).filter(p => p.id !== id));
+  refreshTracker(); toast('Produit supprimé', 'warning');
+}
 function refreshTracker() {
   const ps = load(KEYS.products), c = document.getElementById('tracker-table');
   if (!ps.length) { c.innerHTML = '<div class="empty-state"><h3>Aucun produit</h3></div>'; return; }
   c.innerHTML = '<table><thead><tr><th>Produit</th><th>Coût</th><th>Vente</th><th>Route</th><th>Profit</th><th>Marge</th><th></th></tr></thead><tbody>' +
     ps.sort((a,b) => b.margin - a.margin).map(p =>
-      `<tr><td>${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--accent2)">${p.name}</a>` : p.name}</td><td>${fmt(p.buy)}</td><td>${fmt(p.sell)}</td><td>${p.buySrc} → ${p.sellSrc}</td><td><span class="badge ${p.profit>0?'green':'red'}">${p.profit>0?'+':''}${fmt(p.profit)}</span></td><td><span class="badge ${p.margin>15?'green':p.margin>5?'orange':'red'}">${p.margin}%</span></td><td><button class="delete-btn" onclick="deleteProduct(${p.id})">✕</button></td></tr>`
+      `<tr><td>${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--accent2)">${p.name}</a>` : p.name}</td><td style="white-space:nowrap">${fmt(p.buy)}</td><td style="white-space:nowrap">${fmt(p.sell)}</td><td style="white-space:nowrap">${p.buySrc}→${p.sellSrc}</td><td><span class="badge ${p.profit>0?'green':'red'}">${p.profit>0?'+':''}${fmt(p.profit)}</span></td><td><span class="badge ${p.margin>15?'green':p.margin>5?'orange':'red'}">${p.margin}%</span></td><td><button class="delete-btn" onclick="deleteProduct(${p.id})">✕</button></td></tr>`
     ).join('') + '</tbody></table>';
 }
 function exportData() {
   const ps = load(KEYS.products);
-  if (!ps.length) { alert('Rien à exporter'); return; }
+  if (!ps.length) { toast('Rien à exporter', 'warning'); return; }
   const csv = 'Nom,Coût,Vente,Source,Plateforme,Profit,Marge,Date,URL\n' +
     ps.map(p => `"${p.name}",${p.buy},${p.sell},"${p.buySrc}","${p.sellSrc}",${p.profit},${p.margin}%,"${p.date}","${p.url||''}"`).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `vn_dropship_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('📥 CSV exporté');
 }
 
-// === DASHBOARD ===
+// ===== DASHBOARD =====
 function refreshDash() {
   document.getElementById('stat-niches').textContent = load(KEYS.niches).length;
   document.getElementById('stat-tracked').textContent = load(KEYS.products).length;
-  const monitors = load(KEYS.monitors);
-  const uniqueMonitors = new Set(monitors.map(m => m.product + '|' + m.competitor)).size;
-  document.getElementById('stat-monitors').textContent = uniqueMonitors;
+  document.getElementById('stat-orders').textContent = load(KEYS.orders).filter(o => o.status !== 'delivered').length;
   document.getElementById('stat-listings').textContent = load(KEYS.listings).length;
-
   const topNiches = load(KEYS.niches).sort((a,b) => b.score - a.score).slice(0, 5);
   const c = document.getElementById('dashboard-niches');
-  if (!topNiches.length) {
-    c.innerHTML = '<div class="empty-state"><h3>Aucune niche analysée</h3><p>Va dans l\'onglet Niches pour commencer.</p></div>';
-    return;
-  }
-  c.innerHTML = '<table><thead><tr><th>Niche</th><th>Mots-clés</th><th>Marché</th><th>Score</th></tr></thead><tbody>' +
-    topNiches.map(n => `<tr><td><b>${n.name}</b></td><td><code style="color:var(--accent2)">${n.keyword}</code></td><td>${fmt(n.cost)} → ${fmt(n.price)}</td><td><span class="badge ${n.score>75?'green':n.score>55?'orange':'red'}">${n.score}/100</span></td></tr>`).join('') +
-    '</tbody></table>';
+  if (!topNiches.length) { c.innerHTML = '<div class="empty-state"><h3>Aucune niche</h3><p>Onglet Niches → Analyse ta première niche.</p></div>'; return; }
+  c.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Niche</th><th>Keyword</th><th>Marché</th><th>Score</th></tr></thead><tbody>' +
+    topNiches.map(n => `<tr><td><b>${n.name}</b></td><td><code style="color:var(--accent2);font-size:12px">${n.keyword}</code></td><td style="white-space:nowrap">${fmt(n.cost)} → ${fmt(n.price)}</td><td><span class="badge ${n.score>75?'green':n.score>55?'orange':'red'}">${n.score}/100</span></td></tr>`).join('') +
+    '</tbody></table></div>';
 }
 
-// Init
+// ===== INIT =====
+filterOrders('all');
 seedIfEmpty();
 refreshDash();
+refreshLaunch();
 </script>
 </body>
 </html>
